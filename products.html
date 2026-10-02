@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BETA — Product Catalog</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+<style>
+:root { --sun: #F2A900; --ocean: #003087; --ink: #071321; --paper: #F4F2EB; --white: #FFFFFF; --muted: #66717c; --line: rgba(7, 19, 33, 0.15); --max: 1380px; --header-height: 92px; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: "DM Sans", sans-serif; background: var(--paper); color: var(--ink); overflow-x: hidden; }
+html[dir="rtl"] body { font-family: "Cairo", sans-serif; }
+h1, h2, h3, .brand { font-family: "Manrope", sans-serif; }
+html[dir="rtl"] h1, html[dir="rtl"] h2, html[dir="rtl"] h3, html[dir="rtl"] .brand { font-family: "Cairo", sans-serif; }
+a { text-decoration: none; color: inherit; } button { font: inherit; cursor: pointer; border: none; background: none; }
+img { display: block; width: 100%; height: auto; }
+
+.nav { position: fixed; top: 0; left: 0; width: 100%; z-index: 1000; background: var(--ink); color: var(--white); border-bottom: 1px solid rgba(255,255,255,.1); }
+.nav-inner { width: min(var(--max), calc(100% - 64px)); height: var(--header-height); margin: auto; display: flex; align-items: center; justify-content: space-between; }
+.brand { display: flex; align-items: center; gap: 12px; font-size: 26px; font-weight: 800; letter-spacing: .08em; }
+.brand-mark { width: 30px; height: 30px; position: relative; transform: skew(-14deg) rotate(45deg); border: 3px solid var(--sun); }
+.brand-mark:before { content: ""; position: absolute; left: 6px; top: 2px; width: 3px; height: 20px; background: var(--sun); }
+.nav-links { display: flex; gap: 32px; } .nav-links a { font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; opacity: .72; }
+.nav-links a:hover, .nav-links a.active { opacity: 1; color: var(--sun); }
+.lang-switch { font-size: 11px; font-weight: 700; color: var(--white); opacity: 0.8; } .lang-switch .active-lang { opacity: 1; color: var(--sun); }
+.quote { background: var(--sun); color: var(--ink); padding: 14px 19px; font-size: 10px; font-weight: 800; text-transform: uppercase; }
+
+main { min-height: calc(100vh - var(--header-height)); padding-top: var(--header-height); }
+.container { width: min(var(--max), calc(100% - 64px)); margin: auto; }
+.section-pad { padding: 100px 0; }
+.inner-hero { background: var(--ink); color: var(--white); padding: 120px 0 100px; text-align: center; }
+.inner-hero h1 { font-size: clamp(50px, 6vw, 80px); line-height: 1; margin-bottom: 20px; }
+.label { font-size: 10px; font-weight: 800; color: var(--sun); letter-spacing: .23em; text-transform: uppercase; margin-bottom: 15px; display: inline-block; }
+
+.products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 30px; }
+.prod-card { background: var(--white); border: 1px solid var(--line); padding: 30px; transition: 0.4s; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; }
+.prod-card:hover { transform: translateY(-8px); border-color: var(--ocean); box-shadow: 0 15px 35px rgba(0,0,0,0.06); }
+.prod-img { height: 200px; overflow: hidden; margin-bottom: 20px; }
+.prod-img img { width: 100%; height: 100%; object-fit: cover; transition: 0.6s; }
+.prod-card:hover .prod-img img { transform: scale(1.05); }
+.prod-card h3 { font-size: 22px; color: var(--ink); margin-bottom: 10px; }
+.prod-card p { font-size: 14px; color: var(--muted); margin-bottom: 20px; }
+.btn-spec { font-size: 11px; font-weight: 800; color: var(--ocean); text-transform: uppercase; letter-spacing: 0.1em; }
+
+/* DRAWER MODAL */
+.drawer-overlay { position: fixed; inset: 0; background: rgba(7, 19, 33, 0.7); backdrop-filter: blur(4px); z-index: 2000; opacity: 0; pointer-events: none; transition: 0.4s; }
+.drawer-overlay.active { opacity: 1; pointer-events: all; }
+.drawer { position: fixed; top: 0; right: 0; width: min(600px, 100%); height: 100vh; background: var(--white); z-index: 2001; transform: translateX(100%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); padding: 50px; overflow-y: auto; display: flex; flex-direction: column; justify-content: space-between; }
+html[dir="rtl"] .drawer { right: auto; left: 0; transform: translateX(-100%); }
+.drawer-overlay.active .drawer { transform: translateX(0); }
+.drawer-close { font-size: 30px; cursor: pointer; align-self: flex-end; margin-bottom: 20px; }
+
+footer { padding: 80px 0 30px; background: var(--ink); color: var(--white); }
+.footer-top { display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.15); padding-bottom: 45px; }
+.footer-bottom { display: flex; justify-content: space-between; padding-top: 25px; font-size: 10px; color: #566574; text-transform: uppercase; letter-spacing: .15em; }
+</style>
+</head>
+<body>
+
+<header class="nav">
+    <div class="nav-inner">
+        <a class="brand" href="index.html"><span class="brand-mark"></span>BETA</a>
+        <nav class="nav-links">
+            <a href="index.html" data-i18n="nav.home">Home</a>
+            <a href="about.html" data-i18n="nav.about">About</a>
+            <a href="services.html" data-i18n="nav.services">Services</a>
+            <a href="products.html" class="active" data-i18n="nav.products">Products</a>
+            <a href="projects.html" data-i18n="nav.projects">Projects</a>
+            <a href="contact.html" data-i18n="nav.contact">Contact</a>
+        </nav>
+        <div class="nav-right">
+            <button class="lang-switch" onclick="toggleLanguage()"><span id="lang-en" class="active-lang">EN</span> | <span id="lang-ar">عربي</span></button>
+            <a class="quote" href="contact.html" data-i18n="nav.quote">Request Quote</a>
+        </div>
+    </div>
+</header>
+
+<main>
+    <section class="inner-hero">
+        <div class="container gsap-hero">
+            <div class="label" data-i18n="pr.label">Manufacturing Range</div>
+            <h1 data-i18n="pr.title">Structural & Fabricated <br>Steel Line.</h1>
+        </div>
+    </section>
+
+    <section class="section-pad">
+        <div class="container">
+            <div class="products-grid">
+                <div class="prod-card gsap-fade-up" onclick="openDrawer('p1')">
+                    <div class="prod-img"><img src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=600&q=80" alt="Structural Frame"></div>
+                    <h3>Heavy Structural Columns & Beams</h3>
+                    <p>High-yield ASTM steel framing for factories, warehouses, and multi-story buildings[cite: 2].</p>
+                    <span class="btn-spec" data-i18n="pr.viewSpec">View Technical Specs →</span>
+                </div>
+
+                <div class="prod-card gsap-fade-up" onclick="openDrawer('p2')">
+                    <div class="prod-img"><img src="https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?auto=format&fit=crop&w=600&q=80" alt="Roof Trusses"></div>
+                    <h3>Clear-Span Roof Trusses</h3>
+                    <p>Long-span steel trusses designed for column-free storage environments[cite: 2].</p>
+                    <span class="btn-spec" data-i18n="pr.viewSpec">View Technical Specs →</span>
+                </div>
+
+                <div class="prod-card gsap-fade-up" onclick="openDrawer('p3')">
+                    <div class="prod-img"><img src="https://images.unsplash.com/photo-1589939705384-5185137a7f0f?auto=format&fit=crop&w=600&q=80" alt="Plates"></div>
+                    <h3>Built-Up Girders & Plate Work</h3>
+                    <p>Custom welded plate girders for heavy infrastructure and crane runways[cite: 2].</p>
+                    <span class="btn-spec" data-i18n="pr.viewSpec">View Technical Specs →</span>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<!-- SLIDE DRAWER -->
+<div class="drawer-overlay" id="drawerOverlay">
+    <div class="drawer">
+        <div>
+            <div class="drawer-close" onclick="closeDrawer()">&times;</div>
+            <div id="drawerBody"></div>
+        </div>
+        <div style="margin-top:30px;">
+            <a href="contact.html" style="display:block; text-align:center; background:var(--ink); color:var(--sun); padding:16px; font-weight:800; text-transform:uppercase;" data-i18n="pr.reqQuote">Request Spec Quote</a>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <div class="container">
+        <div class="footer-top"><a class="brand" href="index.html"><span class="brand-mark"></span>BETA</a></div>
+        <div class="footer-bottom"><span>© 2026 BETA</span><span data-i18n="footer.tagline">Engineer. Manufacture. Install.</span></div>
+    </div>
+</footer>
+
+<script>
+    const prodSpecs = {
+        p1: { title: "Heavy Structural Columns & Beams", grade: "ASTM A36 / A992", finish: "Hot-Dip Galvanized / Epoxy Primer", desc: "Engineered to deliver high load-bearing capacity for multi-story industrial plants[cite: 2]." },
+        p2: { title: "Clear-Span Roof Trusses", grade: "S275 / S355 Structural Steel", finish: "Industrial Painted", desc: "Allows column-free layouts up to 60 meters wide for high-bay distribution hubs[cite: 2]." },
+        p3: { title: "Built-Up Girders & Plate Work", grade: "High-Strength Plate Steel", finish: "Marine-Grade Protective Coating", desc: "Automated submerged arc welding ensures flawless joint integrity under heavy crane cycles[cite: 2]." }
+    };
+
+    function openDrawer(id) {
+        const item = prodSpecs[id];
+        document.getElementById('drawerBody').innerHTML = `
+            <div style="font-size:10px; font-weight:800; color:var(--sun); text-transform:uppercase; margin-bottom:10px;">Technical Specification Sheet</div>
+            <h2 style="font-size:30px; margin-bottom:20px; line-height:1.2;">${item.title}</h2>
+            <p style="color:var(--muted); margin-bottom:30px; line-height:1.7;">${item.desc}</p>
+            <table style="width:100%; border-collapse:collapse;">
+                <tr style="border-bottom:1px solid var(--line);"><td style="padding:12px 0; font-weight:bold;">Material Grade</td><td style="padding:12px 0; color:var(--muted);">${item.grade}</td></tr>
+                <tr style="border-bottom:1px solid var(--line);"><td style="padding:12px 0; font-weight:bold;">Surface Coating</td><td style="padding:12px 0; color:var(--muted);">${item.finish}</td></tr>
+                <tr style="border-bottom:1px solid var(--line);"><td style="padding:12px 0; font-weight:bold;">Compliance</td><td style="padding:12px 0; color:var(--muted);">AWS D1.1 / ISO 9001 Certified[cite: 2]</td></tr>
+            </table>
+        `;
+        document.getElementById('drawerOverlay').classList.add('active');
+    }
+
+    function closeDrawer() { document.getElementById('drawerOverlay').classList.remove('active'); }
+
+    const translations = {
+        en: { nav: { home: "Home", about: "About", services: "Services", products: "Products", projects: "Projects", contact: "Contact", quote: "Request Quote" }, pr: { label: "Manufacturing Range", title: "Structural & Fabricated <br>Steel Line.", viewSpec: "View Technical Specs →", reqQuote: "Request Spec Quote" }, footer: { tagline: "Engineer. Manufacture. Install." } },
+        ar: { nav: { home: "الرئيسية", about: "عن الشركة", services: "الخدمات", products: "المنتجات", projects: "المشاريع", contact: "اتصل بنا", quote: "طلب عرض سعر" }, pr: { label: "مجموعة التصنيع", title: "خط الإنتاج <br>الهيكلي والفولاذي.", viewSpec: "عرض المواصفات التقنية ←", reqQuote: "طلب عرض سعر للمواصفة" }, footer: { tagline: "هندسة. تصنيع. تركيب." } }
+    };
+
+    let currentLang = localStorage.getItem('beta_lang') || 'en';
+    gsap.registerPlugin(ScrollTrigger);
+    function resolvePath(p, o) { return p.split('.').reduce((a, b) => a && a[b], o); }
+    function updateLang() { document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr'; document.documentElement.lang = currentLang; document.getElementById('lang-en').className = currentLang === 'en' ? 'active-lang' : ''; document.getElementById('lang-ar').className = currentLang === 'ar' ? 'active-lang' : ''; document.querySelectorAll('[data-i18n]').forEach(e => { const t = resolvePath(e.getAttribute('data-i18n'), translations[currentLang]); if(t) e.innerHTML = t; }); setTimeout(() => ScrollTrigger.refresh(), 150); }
+    function toggleLanguage() { currentLang = currentLang === 'en' ? 'ar' : 'en'; localStorage.setItem('beta_lang', currentLang); updateLang(); }
+    document.addEventListener("DOMContentLoaded", () => { updateLang(); gsap.fromTo('.gsap-hero > *', { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, stagger: 0.1 }); gsap.fromTo('.gsap-fade-up', { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, scrollTrigger: { trigger: '.gsap-fade-up', start: 'top 85%' } }); });
+</script>
+</body>
+</html>
