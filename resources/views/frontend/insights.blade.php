@@ -59,15 +59,15 @@ footer { padding: 80px 0 30px; background: var(--ink); color: var(--white); }
 <body>
 <header class="nav">
     <div class="nav-inner">
-        <a class="brand" href="index.html"><span class="brand-mark"></span>BETA</a>
+        <a class="brand" href="{{ route('home') }}"><span class="brand-mark"></span>BETA</a>
         <nav class="nav-links">
-            <a href="index.html" data-i18n="nav.home">Home</a>
-            <a href="insights.html" class="active" data-i18n="nav.insights">Insights</a>
-            <a href="contact.html" data-i18n="nav.contact">Contact</a>
+            <a href="{{ route('home') }}" @class(['active' => request()->routeIs('home')]) data-i18n="nav.home">Home</a>
+            <a href="{{ route('announcements') }}" @class(['active' => request()->routeIs('announcements*', 'insights*')]) data-i18n="nav.insights">Insights</a>
+            <a href="{{ route('contact') }}" @class(['active' => request()->routeIs('contact')]) data-i18n="nav.contact">Contact</a>
         </nav>
         <div class="nav-right">
             <button class="lang-switch" onclick="toggleLanguage()"><span id="lang-en" class="active-lang">EN</span> | <span id="lang-ar">عربي</span></button>
-            <a class="quote" href="contact.html" data-i18n="nav.quote">Request a Quote</a>
+            <a class="quote" href="{{ route('contact') }}" data-i18n="nav.quote">Request a Quote</a>
         </div>
     </div>
 </header>
@@ -94,7 +94,7 @@ footer { padding: 80px 0 30px; background: var(--ink); color: var(--white); }
                         <small data-i18n="ins.t1">Steel Structures</small>
                         <h3 data-i18n="ins.b1.title">Advancements in Load-Bearing Architectural Steel</h3>
                         <p data-i18n="ins.b1.desc">Exploring modern fabrication techniques that allow for wider spans and increased structural integrity in commercial buildings.</p>
-                        <a href="insight-detail.html" data-i18n="ins.read">Read Article →</a>
+                        <a href="{{ route('announcements') }}" data-i18n="ins.read">Read Article →</a>
                     </div>
                 </div>
                 <div class="blog-card gsap-fade-up">
@@ -103,7 +103,7 @@ footer { padding: 80px 0 30px; background: var(--ink); color: var(--white); }
                         <small data-i18n="ins.t4">Safety</small>
                         <h3 data-i18n="ins.b2.title">Implementing HSE Standards in Heavy Fabrication</h3>
                         <p data-i18n="ins.b2.desc">A deep dive into BETA's safety protocols and how stringent regulations improve factory floor efficiency.</p>
-                        <a href="insight-detail.html" data-i18n="ins.read">Read Article →</a>
+                        <a href="{{ route('announcements') }}" data-i18n="ins.read">Read Article →</a>
                     </div>
                 </div>
                 <div class="blog-card gsap-fade-up">
@@ -112,7 +112,7 @@ footer { padding: 80px 0 30px; background: var(--ink); color: var(--white); }
                         <small data-i18n="ins.t5">Case Studies</small>
                         <h3 data-i18n="ins.b3.title">Delivering the Al-Zamil Logistics Hub</h3>
                         <p data-i18n="ins.b3.desc">How our engineering team designed and executed a 10,000-ton warehouse structure under strict deadlines.</p>
-                        <a href="insight-detail.html" data-i18n="ins.read">Read Article →</a>
+                        <a href="{{ route('announcements') }}" data-i18n="ins.read">Read Article →</a>
                     </div>
                 </div>
             </div>
@@ -121,7 +121,7 @@ footer { padding: 80px 0 30px; background: var(--ink); color: var(--white); }
 </main>
 <footer>
     <div class="container">
-        <div class="footer-top"><a class="brand" href="index.html"><span class="brand-mark"></span>BETA</a></div>
+        <div class="footer-top"><a class="brand" href="{{ route('home') }}"><span class="brand-mark"></span>BETA</a></div>
         <div class="footer-bottom"><span>© 2026 BETA</span><span data-i18n="footer.tagline">Engineer. Manufacture. Install.</span></div>
     </div>
 </footer>

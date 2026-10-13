@@ -56,14 +56,14 @@ footer { padding: 80px 0 30px; background: var(--ink); color: var(--white); }
 <body>
 <header class="nav">
     <div class="nav-inner">
-        <a class="brand" href="index.html"><span class="brand-mark"></span>BETA</a>
+        <a class="brand" href="{{ route('home') }}"><span class="brand-mark"></span>BETA</a>
         <nav class="nav-links">
-            <a href="index.html" data-i18n="nav.home">Home</a>
-            <a href="about.html" data-i18n="nav.about">About</a>
-            <a href="services.html" data-i18n="nav.services">Services</a>
-            <a href="products.html" data-i18n="nav.products">Products</a>
-            <a href="projects.html" data-i18n="nav.projects">Projects</a>
-            <a href="contact.html" class="active" data-i18n="nav.contact">Contact & Careers</a>
+            <a href="{{ route('home') }}" @class(['active' => request()->routeIs('home')]) data-i18n="nav.home">Home</a>
+            <a href="{{ route('about') }}" @class(['active' => request()->routeIs('about')]) data-i18n="nav.about">About</a>
+            <a href="{{ route('services') }}" @class(['active' => request()->routeIs('services')]) data-i18n="nav.services">Services</a>
+            <a href="{{ route('products') }}" @class(['active' => request()->routeIs('products')]) data-i18n="nav.products">Products</a>
+            <a href="{{ route('projects') }}" @class(['active' => request()->routeIs('projects')]) data-i18n="nav.projects">Projects</a>
+            <a href="{{ route('contact') }}" @class(['active' => request()->routeIs('contact')]) data-i18n="nav.contact">Contact & Careers</a>
         </nav>
         <div class="nav-right">
             <button class="lang-switch" onclick="toggleLanguage()"><span id="lang-en" class="active-lang">EN</span> | <span id="lang-ar">عربي</span></button>
@@ -147,7 +147,7 @@ footer { padding: 80px 0 30px; background: var(--ink); color: var(--white); }
 
 <footer>
     <div class="container">
-        <div class="footer-top"><a class="brand" href="index.html"><span class="brand-mark"></span>BETA</a></div>
+        <div class="footer-top"><a class="brand" href="{{ route('home') }}"><span class="brand-mark"></span>BETA</a></div>
         <div class="footer-bottom"><span>© 2026 BETA</span><span data-i18n="footer.tagline">Engineer. Manufacture. Install.</span></div>
     </div>
 </footer>

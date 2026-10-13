@@ -59,10 +59,10 @@ footer { padding: 80px 0 30px; background: var(--ink); color: var(--white); }
     <div class="nav-inner">
         <a class="brand" href="{{ route('home') }}"><span class="brand-mark"></span>BETA</a>
         <nav class="nav-links">
-            <a href="{{ route('home') }}">{{ __('app.nav.home') }}</a>
-            <a href="{{ route('services') }}">{{ __('app.nav.services') }}</a>
-            <a href="{{ route('products') }}" class="active">{{ __('app.nav.products') }}</a>
-            <a href="{{ route('contact') }}">{{ __('app.nav.contact') }}</a>
+            <a href="{{ route('home') }}" @class(['active' => request()->routeIs('home')])>{{ __('app.nav.home') }}</a>
+            <a href="{{ route('services') }}" @class(['active' => request()->routeIs('services')])>{{ __('app.nav.services') }}</a>
+            <a href="{{ route('products') }}" @class(['active' => request()->routeIs('products')])>{{ __('app.nav.products') }}</a>
+            <a href="{{ route('contact') }}" @class(['active' => request()->routeIs('contact')])>{{ __('app.nav.contact') }}</a>
         </nav>
         <div style="display:flex; align-items:center; gap:20px;">
             <span class="lang-switch">

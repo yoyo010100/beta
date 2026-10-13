@@ -764,28 +764,28 @@ footer{
         </div>
 
         <div class="solution-list">
-            <a class="solution reveal" href="#">
+            <a class="solution reveal" href="{{ route('services') }}">
                 <span class="solution-no">01</span>
                 <h3>Steel Structures</h3>
                 <p>Structural systems engineered for commercial, industrial and infrastructure applications.</p>
                 <span class="solution-arrow">↗</span>
             </a>
 
-            <a class="solution reveal" href="#">
+            <a class="solution reveal" href="{{ route('services') }}">
                 <span class="solution-no">02</span>
                 <h3>Metal Fabrication</h3>
                 <p>High-precision fabrication for architectural and industrial requirements.</p>
                 <span class="solution-arrow">↗</span>
             </a>
 
-            <a class="solution reveal" href="#">
+            <a class="solution reveal" href="{{ route('services') }}">
                 <span class="solution-no">03</span>
                 <h3>Waste Solutions</h3>
                 <p>Purpose-built systems and structures designed around operational requirements.</p>
                 <span class="solution-arrow">↗</span>
             </a>
 
-            <a class="solution reveal" href="#">
+            <a class="solution reveal" href="{{ route('services') }}">
                 <span class="solution-no">04</span>
                 <h3>Custom Solutions</h3>
                 <p>Project-specific engineering, custom dimensions and one-off fabrication.</p>
@@ -864,7 +864,7 @@ footer{
                     This area becomes the visual proof of BETA's ability
                     to execute projects at scale.
                 </p>
-                <a href="#">View Project →</a>
+                <a href="{{ route('projects') }}">View Project →</a>
             </div>
         </div>
     </div>
@@ -903,9 +903,9 @@ footer{
                 </div>
                 <div class="footer-col">
                     <h4>Company</h4>
-                    <a href="#">About BETA</a>
-                    <a href="#">Quality</a>
-                    <a href="#">Insights</a>
+                    <a href="{{ route('about') }}">About BETA</a>
+                    <a href="{{ route('about') }}">Quality</a>
+                    <a href="{{ route('announcements') }}">Insights</a>
                 </div>
                 <div class="footer-col">
                     <h4>Contact</h4>

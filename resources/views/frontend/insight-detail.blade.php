@@ -40,8 +40,8 @@ a { text-decoration: none; color: inherit; } button { font: inherit; cursor: poi
 <body>
 <header class="nav">
     <div class="nav-inner">
-        <a class="brand" href="index.html"><span class="brand-mark"></span>BETA</a>
-        <nav class="nav-links"><a href="insights.html" data-i18n="nav.back">← Back to Insights</a></nav>
+        <a class="brand" href="{{ route('home') }}"><span class="brand-mark"></span>BETA</a>
+        <nav class="nav-links"><a href="{{ route('announcements') }}" data-i18n="nav.back">← Back to Insights</a></nav>
         <button class="lang-switch" onclick="toggleLanguage()"><span id="lang-en" class="active-lang">EN</span> | <span id="lang-ar">عربي</span></button>
     </div>
 </header>

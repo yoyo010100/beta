@@ -157,7 +157,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }).render();
 
     // Lead Funnel Bar
-    const funnelData = @json($funnelData ?? ['new'=>0,'reviewing'=>0,'quoted'=>0,'accepted'=>0]);
+    @php($funnelDefaults = ['new' => 0, 'reviewing' => 0, 'quoted' => 0, 'accepted' => 0])
+    const funnelData = @json($funnelData ?? $funnelDefaults);
     new ApexCharts(document.getElementById('funnelChart'), {
         chart: { type: 'bar', height: 240, toolbar: { show: false }, fontFamily: 'DM Sans, sans-serif' },
         plotOptions: { bar: { horizontal: true, borderRadius: 4 } },
