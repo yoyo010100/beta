@@ -14,11 +14,18 @@ class QuoteRequest extends Model
 {
     use HasPublicId, TranslatableJson, SoftDeletes;
 
-    protected $fillable = [
-        'public_id', 'client_name', 'company_name', 'email', 'phone',
-        'country_id', 'service_id', 'product_id',
-        'client_message', 'status', 'submitted_at',
-    ];
+    protected $guarded = ['id'];
+
+    /** Never expose the auto-increment key in JSON/API responses. */
+    protected $hidden = ['id'];
+
+    /**
+     * Bind routes by the 26-character ULID `public_id`, never the integer id.
+     */
+    public function getRouteKeyName(): string
+    {
+        return 'public_id';
+    }
 
     public function getTable()
     {

@@ -68,7 +68,16 @@
             </div>
         </div>
         @endforeach
+
+        <h4 style="margin-top:22px">Applicants by Position</h4>
+        <div id="hrPositionChart"></div>
     </div>
+</div>
+
+{{-- TOP REQUESTED ITEMS --}}
+<div class="chart-card">
+    <h4>Top Requested Items (Products &amp; Services)</h4>
+    <div id="topItemsChart"></div>
 </div>
 
 {{-- RECENT LEADS --}}
@@ -110,21 +119,24 @@
 @endsection
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-    // Revenue & Profit Chart
-    const months = @json($monthlyData->pluck('month'));
-    const revenue = @json($monthlyData->pluck('revenue'));
-    const profit = @json($monthlyData->pluck('profit'));
+    // Safe JSON encoding with fallback empty arrays
+    const months = @json($monthlyData?->pluck('month') ?? []);
+    const revenue = @json($monthlyData?->pluck('revenue') ?? []);
+    const cost = @json($monthlyData?->pluck('cost') ?? []);
+    const profit = @json($monthlyData?->pluck('profit') ?? []);
 
     new ApexCharts(document.getElementById('revenueChart'), {
         chart: { type: 'area', height: 240, toolbar: { show: false }, fontFamily: 'DM Sans, sans-serif' },
         series: [
             { name: 'Revenue', data: revenue.map(Number) },
+            { name: 'Cost', data: cost.map(Number) },
             { name: 'Profit', data: profit.map(Number) }
         ],
         xaxis: { categories: months, labels: { style: { fontSize: '11px' } } },
-        colors: ['#003087', '#F2A900'],
+        colors: ['#003087', '#e53e3e', '#F2A900'],
         fill: { type: 'gradient', gradient: { opacityFrom: 0.3, opacityTo: 0.0 } },
         stroke: { width: 2 },
         tooltip: { y: { formatter: v => 'EGP ' + Number(v).toLocaleString() } },
@@ -133,9 +145,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }).render();
 
     // Regional Donut
+    const regionalSeries = @json([$egyptCount ?? 0, $ksaCount ?? 0]);
     new ApexCharts(document.getElementById('regionalChart'), {
         chart: { type: 'donut', height: 200, fontFamily: 'DM Sans, sans-serif' },
-        series: [{{ $egyptCount }}, {{ $ksaCount }}],
+        series: regionalSeries,
         labels: ['Egypt', 'Saudi Arabia'],
         colors: ['#003087', '#F2A900'],
         dataLabels: { enabled: false },
@@ -144,15 +157,42 @@ document.addEventListener("DOMContentLoaded", () => {
     }).render();
 
     // Lead Funnel Bar
+    const funnelData = @json($funnelData ?? ['new'=>0,'reviewing'=>0,'quoted'=>0,'accepted'=>0]);
     new ApexCharts(document.getElementById('funnelChart'), {
         chart: { type: 'bar', height: 240, toolbar: { show: false }, fontFamily: 'DM Sans, sans-serif' },
         plotOptions: { bar: { horizontal: true, borderRadius: 4 } },
-        series: [{ name: 'Leads', data: Object.values(@json($funnelData)) }],
-        xaxis: { categories: Object.keys(@json($funnelData)).map(s => s.charAt(0).toUpperCase() + s.slice(1)) },
+        series: [{ name: 'Leads', data: Object.values(funnelData) }],
+        xaxis: { categories: Object.keys(funnelData).map(s => s.charAt(0).toUpperCase() + s.slice(1)) },
         colors: ['#003087'],
         dataLabels: { style: { fontSize: '11px' } },
         grid: { borderColor: '#f0f0f0' },
         tooltip: { y: { formatter: v => v + ' leads' } }
+    }).render();
+
+    // Top Requested Items Bar
+    const topItemsData = @json($topItems ?? []);
+    new ApexCharts(document.getElementById('topItemsChart'), {
+        chart: { type: 'bar', height: 260, toolbar: { show: false }, fontFamily: 'DM Sans, sans-serif' },
+        plotOptions: { bar: { horizontal: true, borderRadius: 4 } },
+        series: [{ name: 'Requests', data: topItemsData.map(i => i.total ?? 0) }],
+        xaxis: { categories: topItemsData.map(i => i.label ?? '—') },
+        colors: ['#F2A900'],
+        dataLabels: { style: { fontSize: '11px' } },
+        grid: { borderColor: '#f0f0f0' },
+        tooltip: { y: { formatter: v => v + ' requests' } }
+    }).render();
+
+    // HR Applicants by Position
+    const hrPositionData = @json($hrByPosition ?? []);
+    new ApexCharts(document.getElementById('hrPositionChart'), {
+        chart: { type: 'bar', height: 200, toolbar: { show: false }, fontFamily: 'DM Sans, sans-serif' },
+        plotOptions: { bar: { horizontal: true, borderRadius: 4 } },
+        series: [{ name: 'Applicants', data: hrPositionData.map(i => i.total ?? 0) }],
+        xaxis: { categories: hrPositionData.map(i => i.label ?? '—') },
+        colors: ['#003087'],
+        dataLabels: { enabled: false },
+        grid: { borderColor: '#f0f0f0' },
+        tooltip: { y: { formatter: v => v + ' applicants' } }
     }).render();
 });
 </script>

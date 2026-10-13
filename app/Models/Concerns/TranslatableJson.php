@@ -34,4 +34,12 @@ trait TranslatableJson
 
         return '';
     }
+
+    /**
+     * Convenience accessor used by admin/public views for the `title` column.
+     */
+    public function getTitle(?string $locale = null): string
+    {
+        return $this->getTranslated('title', $locale);
+    }
 }

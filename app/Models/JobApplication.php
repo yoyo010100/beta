@@ -12,6 +12,17 @@ class JobApplication extends Model
 
     protected $guarded = ['id'];
 
+    /** Never expose the auto-increment key in JSON/API responses. */
+    protected $hidden = ['id'];
+
+    /**
+     * Bind routes by the 26-character ULID `public_id`, never the integer id.
+     */
+    public function getRouteKeyName(): string
+    {
+        return 'public_id';
+    }
+
     protected $casts = [
         'rating' => 'integer',
         'submitted_at' => 'datetime',

@@ -14,7 +14,14 @@ class SendQuotationNotificationJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public function __construct(public QuoteRequest $quoteRequest) {}
+    public int $tries = 5;
+
+    public int $backoff = 10;
+
+    public function __construct(public QuoteRequest $quoteRequest)
+    {
+        $this->onQueue('notifications');
+    }
 
     public function handle(): void
     {

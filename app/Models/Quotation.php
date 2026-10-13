@@ -10,11 +10,18 @@ class Quotation extends Model
 {
     use HasPublicId;
 
-    protected $fillable = [
-        'public_id', 'quote_request_id', 'admin_user_id', 'currency_id',
-        'factory_cost', 'selling_price', 'profit_amount',
-        'admin_notes', 'status',
-    ];
+    protected $guarded = ['id'];
+
+    /** Never expose the auto-increment key in JSON/API responses. */
+    protected $hidden = ['id'];
+
+    /**
+     * Bind routes by the 26-character ULID `public_id`, never the integer id.
+     */
+    public function getRouteKeyName(): string
+    {
+        return 'public_id';
+    }
 
     protected $casts = [
         'factory_cost' => 'decimal:2',

@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\ApplicationRatingRequest;
+use App\Http\Requests\Admin\ApplicationStatusRequest;
+use App\Http\Requests\Admin\JobPostingRequest;
 use App\Models\JobApplication;
 use App\Models\JobPosting;
 use App\Services\AuditLogger;
@@ -42,11 +45,9 @@ class CareersController extends Controller
         return view('admin.careers.show', compact('application'));
     }
 
-    public function updateRating(Request $request, JobApplication $application)
+    public function updateRating(ApplicationRatingRequest $request, JobApplication $application)
     {
-        $validated = $request->validate([
-            'rating' => ['required', 'integer', 'min:0', 'max:5'],
-        ]);
+        $validated = $request->validated();
 
         $old = $application->only(['rating', 'status']);
         $application->update(['rating' => $validated['rating']]);
@@ -56,11 +57,9 @@ class CareersController extends Controller
         return response()->json(['success' => true, 'rating' => $validated['rating']]);
     }
 
-    public function updateStatus(Request $request, JobApplication $application)
+    public function updateStatus(ApplicationStatusRequest $request, JobApplication $application)
     {
-        $validated = $request->validate([
-            'status' => ['required', 'in:new,reviewed,interviewing,offered,hired,rejected'],
-        ]);
+        $validated = $request->validated();
 
         $old = $application->only(['status']);
         $application->update(['status' => $validated['status']]);
@@ -79,16 +78,9 @@ class CareersController extends Controller
         return view('admin.careers.postings', compact('postings', 'countries'));
     }
 
-    public function postingStore(Request $request)
+    public function postingStore(JobPostingRequest $request)
     {
-        $validated = $request->validate([
-            'title_ar' => ['required', 'string', 'max:255'],
-            'title_en' => ['required', 'string', 'max:255'],
-            'description_ar' => ['required', 'string'],
-            'description_en' => ['required', 'string'],
-            'country_id' => ['nullable', 'exists:countries,id'],
-            'is_active' => ['boolean'],
-        ]);
+        $validated = $request->validated();
 
         $posting = JobPosting::create([
             'public_id' => (string) \Illuminate\Support\Str::ulid(),

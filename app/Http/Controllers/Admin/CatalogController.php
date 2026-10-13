@@ -3,12 +3,18 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\AttachmentUploadRequest;
+use App\Http\Requests\Admin\ProductRequest;
+use App\Http\Requests\Admin\ServiceRequest;
+use App\Jobs\ProcessFileUploadJob;
+use App\Models\Attachment;
 use App\Models\Product;
 use App\Models\Service;
 use App\Services\AuditLogger;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 
 class CatalogController extends Controller
 {
@@ -25,37 +31,19 @@ class CatalogController extends Controller
         return view('admin.catalog.product-form');
     }
 
-    public function productStore(Request $request)
+    public function productStore(ProductRequest $request)
     {
-        $validated = $request->validate([
-            'title_ar' => ['required', 'string', 'max:255'],
-            'title_en' => ['required', 'string', 'max:255'],
-            'description_ar' => ['nullable', 'string'],
-            'description_en' => ['nullable', 'string'],
-            'slug' => ['required', 'string', 'max:150', 'unique:products,slug'],
-            'spec_keys' => ['nullable', 'array'],
-            'spec_values' => ['nullable', 'array'],
-            'is_active' => ['boolean'],
-        ]);
-
-        $specs = [];
-        if (!empty($validated['spec_keys'])) {
-            foreach ($validated['spec_keys'] as $i => $key) {
-                if (!empty($key) && isset($validated['spec_values'][$i])) {
-                    $specs[$key] = $validated['spec_values'][$i];
-                }
-            }
-        }
+        $validated = $request->validated();
 
         $product = Product::create([
-            'public_id' => (string) Str::ulid(),
             'title' => ['ar' => $validated['title_ar'], 'en' => $validated['title_en']],
             'description' => ['ar' => $validated['description_ar'] ?? '', 'en' => $validated['description_en'] ?? ''],
             'slug' => $validated['slug'],
-            'specifications' => $specs,
+            'specifications' => $this->buildSpecs($validated),
             'is_active' => $request->boolean('is_active', true),
         ]);
 
+        $this->queueAttachment($request, $product);
         $this->flushCatalogCache();
         AuditLogger::log('product.created', $product, null, $product->toArray());
 
@@ -64,38 +52,24 @@ class CatalogController extends Controller
 
     public function productEdit(Product $product)
     {
+        $product->load('attachments');
         return view('admin.catalog.product-form', compact('product'));
     }
 
-    public function productUpdate(Request $request, Product $product)
+    public function productUpdate(ProductRequest $request, Product $product)
     {
-        $validated = $request->validate([
-            'title_ar' => ['required', 'string', 'max:255'],
-            'title_en' => ['required', 'string', 'max:255'],
-            'description_ar' => ['nullable', 'string'],
-            'description_en' => ['nullable', 'string'],
-            'spec_keys' => ['nullable', 'array'],
-            'spec_values' => ['nullable', 'array'],
-            'is_active' => ['boolean'],
-        ]);
-
-        $specs = [];
-        if (!empty($validated['spec_keys'])) {
-            foreach ($validated['spec_keys'] as $i => $key) {
-                if (!empty($key) && isset($validated['spec_values'][$i])) {
-                    $specs[$key] = $validated['spec_values'][$i];
-                }
-            }
-        }
+        $validated = $request->validated();
 
         $old = $product->toArray();
         $product->update([
             'title' => ['ar' => $validated['title_ar'], 'en' => $validated['title_en']],
             'description' => ['ar' => $validated['description_ar'] ?? '', 'en' => $validated['description_en'] ?? ''],
-            'specifications' => $specs,
+            'slug' => $validated['slug'],
+            'specifications' => $this->buildSpecs($validated),
             'is_active' => $request->boolean('is_active', true),
         ]);
 
+        $this->queueAttachment($request, $product);
         $this->flushCatalogCache();
         AuditLogger::log('product.updated', $product, $old, $product->fresh()->toArray());
 
@@ -110,6 +84,12 @@ class CatalogController extends Controller
         return redirect()->route('admin.catalog.products')->with('success', 'Product archived.');
     }
 
+    public function productAttachmentStore(AttachmentUploadRequest $request, Product $product)
+    {
+        $this->queueAttachment($request, $product);
+        return redirect()->back()->with('success', 'Attachment upload queued for scanning.');
+    }
+
     // ─── SERVICES ─────────────────────────────────────────────────────────────
 
     public function servicesIndex()
@@ -118,29 +98,52 @@ class CatalogController extends Controller
         return view('admin.catalog.services', compact('services'));
     }
 
-    public function serviceStore(Request $request)
+    public function serviceCreate()
     {
-        $validated = $request->validate([
-            'title_ar' => ['required', 'string', 'max:255'],
-            'title_en' => ['required', 'string', 'max:255'],
-            'description_ar' => ['nullable', 'string'],
-            'description_en' => ['nullable', 'string'],
-            'slug' => ['required', 'string', 'max:150', 'unique:services,slug'],
-            'is_active' => ['boolean'],
-        ]);
+        return view('admin.catalog.service-form');
+    }
+
+    public function serviceStore(ServiceRequest $request)
+    {
+        $validated = $request->validated();
 
         $service = Service::create([
-            'public_id' => (string) Str::ulid(),
             'title' => ['ar' => $validated['title_ar'], 'en' => $validated['title_en']],
             'description' => ['ar' => $validated['description_ar'] ?? '', 'en' => $validated['description_en'] ?? ''],
             'slug' => $validated['slug'],
             'is_active' => $request->boolean('is_active', true),
         ]);
 
+        $this->queueAttachment($request, $service);
         $this->flushCatalogCache();
         AuditLogger::log('service.created', $service, null, $service->toArray());
 
         return redirect()->route('admin.catalog.services')->with('success', 'Service created.');
+    }
+
+    public function serviceEdit(Service $service)
+    {
+        $service->load('attachments');
+        return view('admin.catalog.service-form', compact('service'));
+    }
+
+    public function serviceUpdate(ServiceRequest $request, Service $service)
+    {
+        $validated = $request->validated();
+
+        $old = $service->toArray();
+        $service->update([
+            'title' => ['ar' => $validated['title_ar'], 'en' => $validated['title_en']],
+            'description' => ['ar' => $validated['description_ar'] ?? '', 'en' => $validated['description_en'] ?? ''],
+            'slug' => $validated['slug'],
+            'is_active' => $request->boolean('is_active', true),
+        ]);
+
+        $this->queueAttachment($request, $service);
+        $this->flushCatalogCache();
+        AuditLogger::log('service.updated', $service, $old, $service->fresh()->toArray());
+
+        return redirect()->route('admin.catalog.services')->with('success', 'Service updated.');
     }
 
     public function serviceDestroy(Service $service)
@@ -149,6 +152,60 @@ class CatalogController extends Controller
         $service->delete();
         $this->flushCatalogCache();
         return redirect()->route('admin.catalog.services')->with('success', 'Service deleted.');
+    }
+
+    public function serviceAttachmentStore(AttachmentUploadRequest $request, Service $service)
+    {
+        $this->queueAttachment($request, $service);
+        return redirect()->back()->with('success', 'Attachment upload queued for scanning.');
+    }
+
+    // ─── ATTACHMENTS ──────────────────────────────────────────────────────────
+
+    public function attachmentDestroy(Attachment $attachment)
+    {
+        Storage::disk('private')->delete($attachment->file_path);
+        AuditLogger::log('attachment.deleted', $attachment, $attachment->toArray(), null);
+        $attachment->delete();
+        return redirect()->back()->with('success', 'Attachment removed.');
+    }
+
+    // ─── HELPERS ──────────────────────────────────────────────────────────────
+
+    /**
+     * Build the specifications JSON map from parallel key/value arrays.
+     */
+    private function buildSpecs(array $validated): array
+    {
+        $specs = [];
+        if (!empty($validated['spec_keys'])) {
+            foreach ($validated['spec_keys'] as $i => $key) {
+                if (!empty($key) && isset($validated['spec_values'][$i])) {
+                    $specs[$key] = $validated['spec_values'][$i];
+                }
+            }
+        }
+        return $specs;
+    }
+
+    /**
+     * Push an uploaded file onto the Redis queue for asynchronous scanning/storage.
+     */
+    private function queueAttachment(Request $request, Model $model): void
+    {
+        if (!$request->hasFile('attachment')) {
+            return;
+        }
+
+        $file = $request->file('attachment');
+        $tempPath = $file->store('temp', 'private');
+
+        ProcessFileUploadJob::dispatch(
+            storage_path('app/private/' . $tempPath),
+            $file->getClientOriginalName(),
+            $model::class,
+            $model->getKey()
+        );
     }
 
     private function flushCatalogCache(): void

@@ -40,6 +40,11 @@ main { min-height: calc(100vh - var(--header-height)); padding-top: var(--header
 .form-group label { font-size: 11px; font-weight: bold; text-transform: uppercase; }
 .form-group input, .form-group select, .form-group textarea { padding: 15px; border: 1px solid var(--line); background: var(--paper); font-family: inherit; }
 .form-group textarea { min-height: 120px; }
+.captcha-row { display: flex; align-items: center; gap: 12px; }
+.captcha-row .captcha-question { font-weight: 800; letter-spacing: .04em; background: var(--paper); border: 1px solid var(--line); padding: 15px 18px; white-space: nowrap; }
+.captcha-row input { flex: 1; padding: 15px; border: 1px solid var(--line); background: var(--paper); font-family: inherit; }
+/* Honeypot: invisible to humans, present for bots */
+.hp-field { position: absolute !important; left: -9999px !important; top: -9999px !important; width: 1px !important; height: 1px !important; overflow: hidden !important; opacity: 0 !important; pointer-events: none !important; }
 .submit-btn { background: var(--ink); color: var(--sun); padding: 18px; width: 100%; border: none; font-weight: 800; text-transform: uppercase; cursor: pointer; transition: 0.3s; }
 .submit-btn:hover { background: var(--ocean); color: var(--white); }
 
@@ -76,14 +81,28 @@ footer { padding: 80px 0 30px; background: var(--ink); color: var(--white); }
         <!-- FORM 1: REQUEST QUOTE -->
         <div class="form-box" id="form-quote">
             <h2 style="margin-bottom:30px;" data-i18n="q.title">Project Quotation & Inquiries</h2>
-            <form onsubmit="event.preventDefault(); alert('Quote Request Sent!');">
+            <form action="{{ route('quote.submit') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <!-- Anti-spam: honeypot (hidden) + math captcha -->
+                <div class="hp-field" aria-hidden="true">
+                    <label for="quote-hp-check">Do not fill this field</label>
+                    <input type="text" id="quote-hp-check" name="hp_check" tabindex="-1" autocomplete="off">
+                </div>
+                <input type="hidden" id="quote-hp-time" name="hp_time" value="">
                 <div class="form-grid">
-                    <div class="form-group"><label data-i18n="f.name">Full Name *</label><input type="text" required></div>
-                    <div class="form-group"><label data-i18n="f.email">Email Address *</label><input type="email" required></div>
-                    <div class="form-group"><label data-i18n="f.company">Company Name</label><input type="text"></div>
-                    <div class="form-group"><label data-i18n="f.phone">Phone Number *</label><input type="tel" required></div>
-                    <div class="form-group full"><label data-i18n="f.boq">Upload Drawing / BOQ (PDF)</label><input type="file" accept=".pdf,.dwg"></div>
-                    <div class="form-group full"><label data-i18n="f.details">Project Scope & Details</label><textarea required></textarea></div>
+                    <div class="form-group"><label data-i18n="f.name">Full Name *</label><input type="text" name="client_name" required></div>
+                    <div class="form-group"><label data-i18n="f.email">Email Address *</label><input type="email" name="email" required></div>
+                    <div class="form-group"><label data-i18n="f.company">Company Name</label><input type="text" name="company_name"></div>
+                    <div class="form-group"><label data-i18n="f.phone">Phone Number *</label><input type="tel" name="phone" required></div>
+                    <div class="form-group full"><label data-i18n="f.boq">Upload Drawing / BOQ (PDF)</label><input type="file" name="drawing" accept=".pdf,.dwg"></div>
+                    <div class="form-group full"><label data-i18n="f.details">Project Scope & Details</label><textarea name="client_message" required></textarea></div>
+                    <div class="form-group full">
+                        <label data-i18n="f.captcha">Security Check *</label>
+                        <div class="captcha-row">
+                            <span class="captcha-question" id="quote-captcha-question">&nbsp;</span>
+                            <input type="number" name="captcha_answer" id="quote-captcha" required autocomplete="off" inputmode="numeric" aria-label="Captcha answer">
+                        </div>
+                    </div>
                 </div>
                 <button type="submit" class="submit-btn" data-i18n="f.submitQ">Submit Quote Request</button>
             </form>
@@ -92,18 +111,33 @@ footer { padding: 80px 0 30px; background: var(--ink); color: var(--white); }
         <!-- FORM 2: CAREERS -->
         <div class="form-box" id="form-career" style="display:none;">
             <h2 style="margin-bottom:30px;" data-i18n="c.title">Career Application</h2>
-            <form onsubmit="event.preventDefault(); alert('Application Submitted!');">
+            <form action="{{ route('application.submit') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <!-- Anti-spam: honeypot (hidden) + math captcha -->
+                <div class="hp-field" aria-hidden="true">
+                    <label for="career-hp-check">Do not fill this field</label>
+                    <input type="text" id="career-hp-check" name="hp_check" tabindex="-1" autocomplete="off">
+                </div>
+                <input type="hidden" id="career-hp-time" name="hp_time" value="">
                 <div class="form-grid">
-                    <div class="form-group"><label data-i18n="f.name">Full Name *</label><input type="text" required></div>
-                    <div class="form-group"><label data-i18n="f.email">Email Address *</label><input type="email" required></div>
+                    <div class="form-group"><label data-i18n="f.name">Full Name *</label><input type="text" name="applicant_name" required></div>
+                    <div class="form-group"><label data-i18n="f.email">Email Address *</label><input type="email" name="email" required></div>
                     <div class="form-group full"><label data-i18n="c.pos">Target Position *</label>
-                        <select required>
-                            <option value="eng">Structural Engineer</option>
-                            <option value="wld">Certified Welder</option>
-                            <option value="pm">Project Manager</option>
+                        <select name="job_posting_id" required>
+                            <option value="">Select Position</option>
+                            @foreach($jobs as $job)
+                            <option value="{{ $job->id }}">{{ $job->getTranslated('title') }} ({{ $job->country?->name }})</option>
+                            @endforeach
                         </select>
                     </div>
-                    <div class="form-group full"><label data-i18n="c.cv">Upload CV / Resume (PDF) *</label><input type="file" accept=".pdf" required></div>
+                    <div class="form-group full"><label data-i18n="c.cv">Upload CV / Resume (PDF) *</label><input type="file" name="cv" accept=".pdf" required></div>
+                    <div class="form-group full">
+                        <label data-i18n="f.captcha">Security Check *</label>
+                        <div class="captcha-row">
+                            <span class="captcha-question" id="career-captcha-question">&nbsp;</span>
+                            <input type="number" name="captcha_answer" id="career-captcha" required autocomplete="off" inputmode="numeric" aria-label="Captcha answer">
+                        </div>
+                    </div>
                 </div>
                 <button type="submit" class="submit-btn" data-i18n="c.submitC">Submit Job Application</button>
             </form>
@@ -127,14 +161,55 @@ footer { padding: 80px 0 30px; background: var(--ink); color: var(--white); }
     }
 
     const translations = {
-        en: { nav: { home: "Home", about: "About", services: "Services", products: "Products", projects: "Projects", contact: "Contact & Careers" }, tab: { quote: "Request a Quote", career: "Join Our Team (Careers)" }, q: { title: "Project Quotation & Inquiries" }, c: { title: "Career Application", pos: "Target Position *", cv: "Upload CV / Resume (PDF) *", submitC: "Submit Job Application" }, f: { name: "Full Name *", email: "Email Address *", company: "Company Name", phone: "Phone Number *", boq: "Upload Drawing / BOQ (PDF)", details: "Project Scope & Details", submitQ: "Submit Quote Request" }, footer: { tagline: "Engineer. Manufacture. Install." } },
-        ar: { nav: { home: "الرئيسية", about: "عن الشركة", services: "الخدمات", products: "المنتجات", projects: "المشاريع", contact: "التواصل والتوظيف" }, tab: { quote: "طلب عرض سعر", career: "الانضمام للفريق (الوظائف)" }, q: { title: "استفسارات وعروض أسعار المشاريع" }, c: { title: "تقديم طلب توظيف", pos: "الوظيفة المستهدفة *", cv: "رفع السيرة الذاتية (PDF) *", submitC: "إرسال طلب التوظيف" }, f: { name: "الاسم الكامل *", email: "البريد الإلكتروني *", company: "اسم الشركة", phone: "رقم الهاتف *", boq: "رفع المخطط / مقايسة الأسعار (PDF)", details: "تفاصيل ونطاق المشروع", submitQ: "إرسال طلب عرض السعر" }, footer: { tagline: "هندسة. تصنيع. تركيب." } }
+        en: { nav: { home: "Home", about: "About", services: "Services", products: "Products", projects: "Projects", contact: "Contact & Careers" }, tab: { quote: "Request a Quote", career: "Join Our Team (Careers)" }, q: { title: "Project Quotation & Inquiries" }, c: { title: "Career Application", pos: "Target Position *", cv: "Upload CV / Resume (PDF) *", submitC: "Submit Job Application" }, f: { name: "Full Name *", email: "Email Address *", company: "Company Name", phone: "Phone Number *", boq: "Upload Drawing / BOQ (PDF)", details: "Project Scope & Details", submitQ: "Submit Quote Request", captcha: "Security Check *" }, footer: { tagline: "Engineer. Manufacture. Install." } },
+        ar: { nav: { home: "الرئيسية", about: "عن الشركة", services: "الخدمات", products: "المنتجات", projects: "المشاريع", contact: "التواصل والتوظيف" }, tab: { quote: "طلب عرض سعر", career: "الانضمام للفريق (الوظائف)" }, q: { title: "استفسارات وعروض أسعار المشاريع" }, c: { title: "تقديم طلب توظيف", pos: "الوظيفة المستهدفة *", cv: "رفع السيرة الذاتية (PDF) *", submitC: "إرسال طلب التوظيف" }, f: { name: "الاسم الكامل *", email: "البريد الإلكتروني *", company: "اسم الشركة", phone: "رقم الهاتف *", boq: "رفع المخطط / مقايسة الأسعار (PDF)", details: "تفاصيل ونطاق المشروع", submitQ: "إرسال طلب عرض السعر", captcha: "التحقق الأمني *" }, footer: { tagline: "هندسة. تصنيع. تركيب." } }
     };
     let currentLang = localStorage.getItem('beta_lang') || 'en';
     function resolvePath(p, o) { return p.split('.').reduce((a, b) => a && a[b], o); }
     function updateLang() { document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr'; document.documentElement.lang = currentLang; document.getElementById('lang-en').className = currentLang === 'en' ? 'active-lang' : ''; document.getElementById('lang-ar').className = currentLang === 'ar' ? 'active-lang' : ''; document.querySelectorAll('[data-i18n]').forEach(e => { const t = resolvePath(e.getAttribute('data-i18n'), translations[currentLang]); if(t) e.innerHTML = t; }); }
     function toggleLanguage() { currentLang = currentLang === 'en' ? 'ar' : 'en'; localStorage.setItem('beta_lang', currentLang); updateLang(); }
-    document.addEventListener("DOMContentLoaded", () => { updateLang(); });
+
+    // ---- Anti-spam: math captcha + honeypot ----
+    const captchaAnswers = {};
+    function initCaptcha(key) {
+        const a = Math.floor(Math.random() * 9) + 1;
+        const b = Math.floor(Math.random() * 9) + 1;
+        captchaAnswers[key] = a + b;
+        const q = document.getElementById(key + '-captcha-question');
+        if (q) q.textContent = `${a} + ${b} =`;
+        const t = document.getElementById(key + '-hp-time');
+        if (t) t.value = Date.now();
+    }
+    function handleSubmit(event, key) {
+        event.preventDefault();
+        const form = event.target;
+
+        // 1) Honeypot: bots tend to fill every field.
+        const hpCheck = form.elements['hp_check'];
+        if (hpCheck && hpCheck.value.trim() !== '') return;
+
+        // 2) Time trap: reject impossibly fast (scripted) submissions.
+        const hpTime = parseInt((form.elements['hp_time'] || {}).value, 10) || 0;
+        if (hpTime && Date.now() - hpTime < 3000) {
+            alert('Form submitted too quickly. Please try again.');
+            return;
+        }
+
+        // 3) Math captcha.
+        const answer = parseInt((form.elements['captcha'] || {}).value, 10);
+        if (answer !== captchaAnswers[key]) {
+            alert('Incorrect security answer. Please try again.');
+            form.elements['captcha'].value = '';
+            initCaptcha(key);
+            return;
+        }
+
+        alert(key === 'quote' ? 'Quote Request Sent!' : 'Application Submitted!');
+        form.reset();
+        initCaptcha(key);
+    }
+
+    document.addEventListener("DOMContentLoaded", () => { updateLang(); initCaptcha('quote'); initCaptcha('career'); });
 </script>
 </body>
 </html>

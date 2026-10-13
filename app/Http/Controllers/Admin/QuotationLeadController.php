@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\LeadStatusRequest;
+use App\Http\Requests\Admin\QuotationStoreRequest;
+use App\Jobs\SendQuotationNotificationJob;
 use App\Models\Country;
 use App\Models\Currency;
 use App\Models\Quotation;
@@ -46,16 +49,13 @@ class QuotationLeadController extends Controller
         return view('admin.leads.show', compact('lead', 'currencies'));
     }
 
-    public function storeQuotation(Request $request, QuoteRequest $lead)
+    public function storeQuotation(QuotationStoreRequest $request, QuoteRequest $lead)
     {
-        $validated = $request->validate([
-            'currency_id' => ['required', 'exists:currencies,id'],
-            'factory_cost' => ['required', 'numeric', 'min:0'],
-            'selling_price' => ['required', 'numeric', 'min:0'],
-            'admin_notes' => ['nullable', 'string', 'max:5000'],
-        ]);
+        $validated = $request->validated();
 
         $oldQuotation = $lead->quotation ? $lead->quotation->toArray() : null;
+
+        $profitAmount = $validated['selling_price'] - $validated['factory_cost'];
 
         $quotation = Quotation::updateOrCreate(
             ['quote_request_id' => $lead->id],
@@ -65,6 +65,7 @@ class QuotationLeadController extends Controller
                 'currency_id' => $validated['currency_id'],
                 'factory_cost' => $validated['factory_cost'],
                 'selling_price' => $validated['selling_price'],
+                'profit_amount' => $profitAmount,
                 'admin_notes' => $validated['admin_notes'],
                 'status' => 'sent_to_client',
             ]
@@ -79,15 +80,16 @@ class QuotationLeadController extends Controller
             ['factory_cost' => $validated['factory_cost'], 'selling_price' => $validated['selling_price'], 'profit_amount' => $validated['selling_price'] - $validated['factory_cost']]
         );
 
+        // Offload client notification to the Redis queue.
+        SendQuotationNotificationJob::dispatch($lead);
+
         return redirect()->route('admin.leads.show', $lead->public_id)
             ->with('success', 'Quotation saved. Profit: ' . number_format($validated['selling_price'] - $validated['factory_cost'], 2));
     }
 
-    public function updateStatus(Request $request, QuoteRequest $lead)
+    public function updateStatus(LeadStatusRequest $request, QuoteRequest $lead)
     {
-        $validated = $request->validate([
-            'status' => ['required', 'in:new,reviewing,quoted,accepted,rejected'],
-        ]);
+        $validated = $request->validated();
 
         $old = $lead->only(['status']);
         $lead->update(['status' => $validated['status']]);
