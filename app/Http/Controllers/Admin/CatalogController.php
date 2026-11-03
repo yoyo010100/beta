@@ -7,6 +7,7 @@ use App\Http\Requests\Admin\AttachmentUploadRequest;
 use App\Http\Requests\Admin\ProductRequest;
 use App\Http\Requests\Admin\ServiceRequest;
 use App\Jobs\ProcessFileUploadJob;
+use App\Jobs\ScanAttachmentMalwareJob;
 use App\Models\Attachment;
 use App\Models\Product;
 use App\Models\Service;
@@ -15,6 +16,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class CatalogController extends Controller
 {
@@ -82,6 +84,14 @@ class CatalogController extends Controller
         $product->delete();
         $this->flushCatalogCache();
         return redirect()->route('admin.catalog.products')->with('success', 'Product archived.');
+    }
+
+    public function restoreProduct($id)
+    {
+        $product = Product::withTrashed()->findOrFail($id);
+        $product->restore();
+        $this->flushCatalogCache();
+        return redirect()->route('admin.catalog.products')->with('success', 'Product restored.');
     }
 
     public function productAttachmentStore(AttachmentUploadRequest $request, Product $product)
@@ -189,7 +199,9 @@ class CatalogController extends Controller
     }
 
     /**
-     * Push an uploaded file onto the Redis queue for asynchronous scanning/storage.
+     * Store the uploaded file and create an Attachment record immediately.
+     * Uses standard native Laravel storage ('public' disk) so files are served
+     * via the storage link and Attachment records are always created synchronously.
      */
     private function queueAttachment(Request $request, Model $model): void
     {
@@ -198,14 +210,19 @@ class CatalogController extends Controller
         }
 
         $file = $request->file('attachment');
-        $tempPath = $file->store('temp', 'private');
 
-        ProcessFileUploadJob::dispatch(
-            storage_path('app/private/' . $tempPath),
-            $file->getClientOriginalName(),
-            $model::class,
-            $model->getKey()
-        );
+        if ($request->hasFile('attachment') && $request->file('attachment')->isValid()) {
+            $path = $file->store('attachments', 'public');
+            $model->attachments()->create([
+                'public_id' => (string) Str::ulid(),
+                'file_path' => $path,
+                'file_name' => $file->getClientOriginalName(),
+                'mime_type' => $file->getClientMimeType(),
+                'size_bytes' => $file->getSize(),
+                'scan_status' => 'pending',
+                'uploaded_at' => now(),
+            ]);
+        }
     }
 
     private function flushCatalogCache(): void

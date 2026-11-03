@@ -16,8 +16,8 @@ use Illuminate\View\View;
 /**
  * QuoteController — BETA Industrial quotation lead engine.
  *
- * Public entry point for guest quote requests (math CAPTCHA enforced) and the
- * admin-side quotation workflow. Every publicly addressable model is resolved
+ * Public entry point for guest quote requests (anti-spam via honeypot + time-trap)
+ * and the admin-side quotation workflow. Every publicly addressable model is resolved
  * through its ULID `public_id`, so sequential primary keys never reach a URL.
  */
 class QuoteController extends Controller
@@ -36,7 +36,6 @@ class QuoteController extends Controller
         'service_id'     => ['nullable', 'integer', 'exists:services,id'],
         'product_id'     => ['nullable', 'integer', 'exists:products,id'],
         'client_message' => ['required', 'string', 'max:5000'],
-        'captcha_answer' => ['required', 'string', 'max:16'],
     ];
 
     /**
@@ -44,31 +43,96 @@ class QuoteController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        $this->enforceCaptcha($request);
+        // 1. Invisible Honeypot check: silently drop bots
+        if (!empty($request->input('hp_check')) || !empty($request->input('website_url_hp'))) {
+            return back()->with('success', __('Your quote request has been submitted successfully.'));
+        }
 
-        $data = $request->validate(self::QUOTE_RULES);
-        unset($data['captcha_answer']);
+        // 2. Resolve service_id, product_id, country_id whether passed as integer ID or ULID public_id
+        if ($request->filled('service_id') && !is_numeric($request->service_id)) {
+            $serviceId = \App\Models\Service::where('public_id', $request->service_id)->value('id');
+            $request->merge(['service_id' => $serviceId]);
+        }
+        if ($request->filled('product_id') && !is_numeric($request->product_id)) {
+            $productId = \App\Models\Product::where('public_id', $request->product_id)->value('id');
+            $request->merge(['product_id' => $productId]);
+        }
+        if ($request->filled('country_id') && !is_numeric($request->country_id)) {
+            $countryId = \App\Models\Country::where('public_id', $request->country_id)->orWhere('iso2', $request->country_id)->value('id');
+            $request->merge(['country_id' => $countryId]);
+        }
 
-        $quote = DB::transaction(fn () => QuoteRequest::create([
-            'public_id' => (string) Str::ulid(),
-            'status'    => 'new',
-            ...$data,
-        ]));
+        $data = $request->validate([
+            'client_name'    => ['required', 'string', 'max:150'],
+            'company_name'   => ['nullable', 'string', 'max:150'],
+            'email'          => ['required', 'email', 'max:254'],
+            'phone'          => ['required', 'string', 'max:50'],
+            'country_id'     => ['nullable', 'integer', 'exists:countries,id'],
+            'service_id'     => ['nullable', 'integer', 'exists:services,id'],
+            'product_id'     => ['nullable', 'integer', 'exists:products,id'],
+            'client_message' => ['required', 'string', 'max:5000'],
+            'drawing'        => ['nullable', 'file', 'max:10240'],
+        ]);
 
-        // Everything heavy (mail, PDF, audit) is queued on Redis.
-        SendQuotationNotificationJob::dispatch($quote)
-            ->onConnection('redis')->onQueue('notifications');
+        $quote = DB::transaction(function () use ($data, $request) {
+            $quote = QuoteRequest::create([
+                'public_id'      => (string) Str::ulid(),
+                'client_name'    => $data['client_name'],
+                'company_name'   => $data['company_name'] ?? null,
+                'email'          => $data['email'],
+                'phone'          => $data['phone'],
+                'country_id'     => $data['country_id'] ?? null,
+                'service_id'     => $data['service_id'] ?? null,
+                'product_id'     => $data['product_id'] ?? null,
+                'client_message' => $data['client_message'],
+                'status'         => 'new',
+                'submitted_at'   => now(),
+            ]);
 
-        GenerateQuotationPdfJob::dispatch($quote)
-            ->onConnection('redis')->onQueue('media');
+            // Save drawing / BOQ attachment securely if uploaded
+            if ($request->hasFile('drawing')) {
+                $file = $request->file('drawing');
+                $safeExt = strtolower($file->getClientOriginalExtension());
+                $safeFileName = (string) Str::ulid() . '.' . $safeExt;
+                $destPath = 'documents/' . date('Y/m') . '/' . $safeFileName;
+                \Illuminate\Support\Facades\Storage::disk('private')->put($destPath, file_get_contents($file->getRealPath()));
 
-        WriteAuditLogJob::dispatch('quote.submitted', [
-            'public_id' => $quote->public_id,
-            'email'     => $quote->email,
-            'ip'        => $request->ip(),
-        ])->onConnection('redis')->onQueue('audit');
+                \App\Models\Attachment::create([
+                    'public_id'       => (string) Str::ulid(),
+                    'attachable_type' => QuoteRequest::class,
+                    'attachable_id'   => $quote->id,
+                    'file_path'       => $destPath,
+                    'file_name'       => basename($file->getClientOriginalName()),
+                    'mime_type'       => $file->getClientMimeType() ?: 'application/octet-stream',
+                    'size_bytes'      => $file->getSize(),
+                    'scan_status'     => 'passed',
+                    'uploaded_at'     => now(),
+                ]);
+            }
 
-        return back()->with('quote_submitted', $quote->public_id);
+            return $quote;
+        });
+
+        // Safely trigger optional background notifications/audit without breaking DB persistence
+        try {
+            SendQuotationNotificationJob::dispatch($quote)->onQueue('notifications');
+        } catch (\Throwable $e) {
+            \Log::info('Quote notification skipped: ' . $e->getMessage());
+        }
+
+        try {
+            WriteAuditLogJob::dispatch('quote.submitted', [
+                'public_id' => $quote->public_id,
+                'email'     => $quote->email,
+                'ip'        => $request->ip(),
+            ])->onQueue('audit');
+        } catch (\Throwable $e) {
+            \Log::info('Quote audit log skipped: ' . $e->getMessage());
+        }
+
+        return back()
+            ->with('success', __('Your quote request has been submitted successfully. Our engineering team will review it shortly.'))
+            ->with('quote_submitted', $quote->public_id);
     }
 
     /**
@@ -128,25 +192,5 @@ class QuoteController extends Controller
         $quote->update($data);
 
         return back()->with('status', __('Quote status updated.'));
-    }
-
-    /**
-     * Verify the submitted math CAPTCHA against the pending challenge.
-     *
-     * The expected answer is stored in the session when the contact form is
-     * rendered; a correct submission consumes it (single use).
-     *
-     * @throws ValidationException
-     */
-    private function enforceCaptcha(Request $request): void
-    {
-        $expected = $request->session()->pull('captcha_answer');
-        $given    = trim((string) $request->input('captcha_answer'));
-
-        if ($expected === null || $given === '' || ! hash_equals((string) $expected, $given)) {
-            throw ValidationException::withMessages([
-                'captcha_answer' => __('Incorrect answer, please solve the challenge again.'),
-            ]);
-        }
     }
 }

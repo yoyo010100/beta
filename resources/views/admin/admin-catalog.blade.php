@@ -72,14 +72,29 @@ tr:hover { background: #f9fafb; }
     <div class="sidebar-header"><div class="brand"><span class="brand-mark"></span>BETA Admin</div></div>
     <nav class="nav-menu">
         <span class="nav-label">Core Modules</span>
-        <a href="admin-dashboard.html" class="nav-item active">📊 Executive Dashboard</a>
-        <a href="admin-leads.html" class="nav-item">📩 1. Quotation Leads</a>
-        <a href="admin-catalog.html" class="nav-item">📦 2. Product Catalog</a>
-        <a href="admin-portfolio.html" class="nav-item">🏗️ 3. Projects Portfolio</a>
+        <a href="{{ route('admin.dashboard') }}" @class(['nav-item', 'active' => request()->routeIs('admin.dashboard')])>
+            <span class="icon">📊</span> {{ __('admin.dashboard') }}
+        </a>
+        <a href="{{ route('admin.leads.index') }}" @class(['nav-item', 'active' => request()->routeIs('admin.leads*')])>
+            <span class="icon">📩</span> {{ __('admin.leads') }}
+        </a>
+        <a href="{{ route('admin.catalog.products') }}" @class(['nav-item', 'active' => request()->routeIs('admin.catalog.products*')])>
+            <span class="icon">📦</span> {{ __('admin.catalog.products') }}
+        </a>
+        <a href="{{ route('admin.catalog.services') }}" @class(['nav-item', 'active' => request()->routeIs('admin.catalog.services*')])>
+            <span class="icon">⚙️</span> {{ __('admin.catalog.services') }}
+        </a>
+
         <span class="nav-label" style="margin-top: 30px;">Content & HR</span>
-        <a href="admin-blog.html" class="nav-item">📝 4. Insights & Blog</a>
-        <a href="admin-careers.html" class="nav-item">👥 5. Job Applicants</a>
-        <a href="admin-resources.html" class="nav-item">📂 6. Resource Center</a>
+        <a href="{{ route('admin.announcements.index') }}" @class(['nav-item', 'active' => request()->routeIs('admin.announcements*')])>
+            <span class="icon">📢</span> {{ __('admin.announcements') }}
+        </a>
+        <a href="{{ route('admin.careers.index') }}" @class(['nav-item', 'active' => request()->routeIs('admin.careers.index') || request()->routeIs('admin.careers.show')])>
+            <span class="icon">👥</span> {{ __('admin.careers') }}
+        </a>
+        <a href="{{ route('admin.careers.postings') }}" @class(['nav-item', 'active' => request()->routeIs('admin.careers.postings*')])>
+            <span class="icon">💼</span> {{ __('admin.careers.postings') }}
+        </a>
     </nav>
 </aside>
 
@@ -94,12 +109,12 @@ tr:hover { background: #f9fafb; }
 </html>
 
 <main class="main-content">
-    <header class="topbar"><div class="page-title">Product & Specifications Manager</div><div class="user-profile"><span>Admin Manager</span><div class="avatar">AM</div></div></header>
+    <header class="topbar"><div class="page-title">{{ __('admin.dashboard') }}</div><div class="user-profile"><span>Admin Manager</span><div class="avatar">AM</div></div></header>
     
     <div class="wrapper">
         <div class="flex-between gsap-ui">
-            <h2 style="font-size:24px;">Active Product Catalog</h2>
-            <button class="btn btn-primary">+ Add New Product Specification</button>
+            <h2 style="font-size:24px;">{{ __('admin.catalog.products') }}</h2>
+            <button class="btn btn-primary">{{ __('admin.catalog.add_product') }}</button>
         </div>
 
         <div class="toolbar gsap-ui">
@@ -111,7 +126,15 @@ tr:hover { background: #f9fafb; }
         <div class="table-wrapper gsap-ui">
             <table>
                 <thead>
-                    <tr><th>Spec ID</th><th>Product Name</th><th>Material Grade</th><th>Category</th><th>Datasheet</th><th>Last Updated</th><th>Actions</th></tr>
+                    <tr>
+                        <th>{{ __('admin.table.headers.spec_id') }}</th>
+                        <th>{{ __('admin.table.headers.product_name') }}</th>
+                        <th>{{ __('admin.table.headers.material_grade') }}</th>
+                        <th>{{ __('admin.table.headers.category') }}</th>
+                        <th>{{ __('admin.table.headers.datasheet') }}</th>
+                        <th>{{ __('admin.table.headers.last_updated') }}</th>
+                        <th>{{ __('admin.table.headers.actions') }}</th>
+                    </tr>
                 </thead>
                 <tbody>
                     <tr><td><strong>PRD-1044</strong></td><td>Heavy Structural Columns</td><td>ASTM A36 / A992</td><td>Structural</td><td><span style="color:#38a169;">✅ Attached (v2)</span></td><td>Sep 20, 2026</td><td><button class="btn btn-outline">Edit Spec</button></td></tr>

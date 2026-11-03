@@ -3,54 +3,45 @@
 namespace App\Observers;
 
 use App\Models\Product;
-use App\Services\AuditLogService;
 use Illuminate\Support\Facades\Cache;
 
-/**
- * Flushes the public product catalog cache and audits catalog edits.
- */
 class ProductObserver
 {
-    public function __construct(private AuditLogService $audit) {}
-
-    public function saved(Product $product): void
+    /**
+     * Handle the Product "created" event.
+     */
+    public function created(Product $model): void
     {
-        $this->flush();
+        $this->clearProductCaches($model);
     }
 
-    public function created(Product $product): void
+    /**
+     * Handle the Product "updated" event.
+     */
+    public function updated(Product $model): void
     {
-        $this->audit->logModelEvent($product, 'catalog.product.created');
+        $this->clearProductCaches($model);
     }
 
-    public function updated(Product $product): void
+    /**
+     * Handle the Product "deleted" event.
+     */
+    public function deleted(Product $model): void
     {
-        $this->flush();
-        $this->audit->logModelEvent($product, 'catalog.product.updated');
+        $this->clearProductCaches($model);
     }
 
-    public function deleted(Product $product): void
+    /**
+     * Clear all product-related caches.
+     */
+    protected function clearProductCaches(Product $model): void
     {
-        $this->flush();
-        $this->audit->logModelEvent($product, 'catalog.product.deleted');
-    }
-
-    public function restored(Product $product): void
-    {
-        $this->flush();
-        $this->audit->logModelEvent($product, 'catalog.product.restored');
-    }
-
-    public function forceDeleted(Product $product): void
-    {
-        $this->flush();
-        $this->audit->logModelEvent($product, 'catalog.product.force_deleted');
-    }
-
-    private function flush(): void
-    {
-        foreach (Product::cacheKeys() as $key) {
-            Cache::forget($key);
+        $locales = ['en', 'ar'];
+        foreach ($locales as $locale) {
+            Cache::forget("public_products_{$locale}");
+            foreach (Product::cacheKeys() as $key) {
+                Cache::forget($key);
+            }
         }
     }
 }

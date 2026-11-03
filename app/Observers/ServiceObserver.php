@@ -3,54 +3,46 @@
 namespace App\Observers;
 
 use App\Models\Service;
-use App\Services\AuditLogService;
 use Illuminate\Support\Facades\Cache;
 
-/**
- * Flushes the public service catalog cache and audits catalog edits.
- */
 class ServiceObserver
 {
-    public function __construct(private AuditLogService $audit) {}
-
-    public function saved(Service $service): void
+    /**
+     * Handle the Service "created" event.
+     */
+    public function created(Service $model): void
     {
-        $this->flush();
+        $this->clearServiceCaches($model);
     }
 
-    public function created(Service $service): void
+    /**
+     * Handle the Service "updated" event.
+     */
+    public function updated(Service $model): void
     {
-        $this->audit->logModelEvent($service, 'catalog.service.created');
+        $this->clearServiceCaches($model);
     }
 
-    public function updated(Service $service): void
+    /**
+     * Handle the Service "deleted" event.
+     */
+    public function deleted(Service $model): void
     {
-        $this->flush();
-        $this->audit->logModelEvent($service, 'catalog.service.updated');
+        $this->clearServiceCaches($model);
     }
 
-    public function deleted(Service $service): void
+    /**
+     * Clear all service-related caches.
+     */
+    protected function clearServiceCaches(Service $model): void
     {
-        $this->flush();
-        $this->audit->logModelEvent($service, 'catalog.service.deleted');
-    }
-
-    public function restored(Service $service): void
-    {
-        $this->flush();
-        $this->audit->logModelEvent($service, 'catalog.service.restored');
-    }
-
-    public function forceDeleted(Service $service): void
-    {
-        $this->flush();
-        $this->audit->logModelEvent($service, 'catalog.service.force_deleted');
-    }
-
-    private function flush(): void
-    {
-        foreach (Service::cacheKeys() as $key) {
-            Cache::forget($key);
+        $locales = ['en', 'ar'];
+        foreach ($locales as $locale) {
+            Cache::forget("public.services.{$locale}");
+            Cache::forget("public.services.all.{$locale}");
+            foreach (Service::cacheKeys() as $key) {
+                Cache::forget($key);
+            }
         }
     }
 }

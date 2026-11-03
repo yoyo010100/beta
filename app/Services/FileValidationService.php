@@ -26,31 +26,35 @@ class FileValidationService
 
     /** Extension allow-list per upload profile. */
     private const PROFILES = [
-        self::PROFILE_CV => ['pdf'],
+        self::PROFILE_CV => ['pdf', 'doc', 'docx'],
         self::PROFILE_BOQ => ['pdf', 'dwg', 'dxf', 'jpg', 'jpeg', 'png'],
         self::PROFILE_DRAWING => ['pdf', 'dwg', 'dxf', 'jpg', 'jpeg', 'png'],
-        self::PROFILE_ATTACHMENT => ['pdf', 'dwg', 'dxf', 'jpg', 'jpeg', 'png', 'webp'],
+        self::PROFILE_ATTACHMENT => ['pdf', 'dwg', 'dxf', 'jpg', 'jpeg', 'png', 'webp', 'doc', 'docx'],
     ];
 
     /** Canonical MIME types accepted per extension. */
     private const MIMES = [
-        'pdf' => ['application/pdf'],
-        'dwg' => ['image/vnd.dwg', 'image/x-dwg', 'application/acad', 'application/x-acad', 'application/dwg', 'application/x-dwg', 'application/octet-stream'],
-        'dxf' => ['image/vnd.dxf', 'application/dxf', 'application/x-dxf', 'text/plain', 'application/octet-stream'],
-        'jpg' => ['image/jpeg'],
+        'pdf'  => ['application/pdf'],
+        'doc'  => ['application/msword', 'application/vnd.ms-office', 'application/octet-stream'],
+        'docx' => ['application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/zip', 'application/x-zip', 'application/octet-stream'],
+        'dwg'  => ['image/vnd.dwg', 'image/x-dwg', 'application/acad', 'application/x-acad', 'application/dwg', 'application/x-dwg', 'application/octet-stream'],
+        'dxf'  => ['image/vnd.dxf', 'application/dxf', 'application/x-dxf', 'text/plain', 'application/octet-stream'],
+        'jpg'  => ['image/jpeg'],
         'jpeg' => ['image/jpeg'],
-        'png' => ['image/png'],
+        'png'  => ['image/png'],
         'webp' => ['image/webp'],
     ];
 
     /** Magic-byte signatures (binary vs. text headers handled in magicMatches()). */
     private const MAGIC_BYTES = [
-        'pdf' => ['%PDF-'],
-        'png' => ["\x89PNG\r\n\x1a\n"],
-        'jpg' => ["\xFF\xD8\xFF"],
+        'pdf'  => ['%PDF-'],
+        'doc'  => ["\xD0\xCF\x11\xE0"],
+        'docx' => ["PK\x03\x04"],
+        'png'  => ["\x89PNG\r\n\x1a\n"],
+        'jpg'  => ["\xFF\xD8\xFF"],
         'jpeg' => ["\xFF\xD8\xFF"],
-        'dwg' => ['AC10'],
-        'dxf' => ['SECTION', 'EOF'],
+        'dwg'  => ['AC10'],
+        'dxf'  => ['SECTION', 'EOF'],
     ];
 
     /** Executable / script entrypoints — rejected regardless of extension. */

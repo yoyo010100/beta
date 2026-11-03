@@ -18,34 +18,27 @@ class JobApplicationRequest extends FormRequest
     {
         return [
             'applicant_name' => ['required', 'string', 'max:160'],
-            'email' => ['required', 'email', 'max:254'],
-            'phone' => ['required', 'string', 'max:50'],
-            'job_posting_id' => ['required', 'exists:job_postings,id'],
-            'cv' => ['required', 'file', 'mimes:pdf', 'max:10240'],
+            'email'          => ['required', 'email', 'max:254'],
+            'phone'          => ['required', 'string', 'max:50'],
+            'job_posting_id' => ['nullable', 'exists:job_postings,id'],
+            'cv'             => ['required', 'file', 'mimes:pdf,doc,docx', 'max:10240'],
             'website_url_hp' => ['nullable', 'string'],
 
             // Anti-spam: honeypot must stay empty, timestamp must be present.
-            'hp_check' => ['prohibited'],
-            'hp_time' => ['required', 'integer'],
-
-            // Math CAPTCHA answer (see FrontendController::generateMathCaptcha).
-            'captcha_answer' => ['required', 'numeric'],
+            'hp_check'       => ['prohibited'],
+            'hp_time'        => ['required', 'integer'],
         ];
     }
 
     protected function prepareForValidation(): void
     {
-        // Tolerate either `captcha` or `captcha_answer` as the answer field name.
-        if (! $this->has('captcha_answer') && $this->has('captcha')) {
-            $this->merge(['captcha_answer' => $this->input('captcha')]);
-        }
+        // No longer needed — math captcha removed.
     }
 
     public function withValidator(Validator $validator): void
     {
         $validator->after(function (Validator $validator): void {
             $this->verifyElapsedTime($validator);
-            $this->verifyMathCaptcha($validator);
 
             if ($file = $this->file('cv')) {
                 $result = app(FileValidationService::class)->validate($file, FileValidationService::PROFILE_CV);
@@ -82,24 +75,11 @@ class JobApplicationRequest extends FormRequest
     }
 
     /**
-     * Compare the answer against the session challenge and consume it (single use).
-     */
-    private function verifyMathCaptcha(Validator $validator): void
-    {
-        $expected = $this->session()->pull('math_captcha_result');
-        $given = $this->input('captcha_answer');
-
-        if ($expected === null || ! is_numeric($given) || (int) $given !== (int) $expected) {
-            $validator->errors()->add('captcha_answer', __('Incorrect answer, please solve the challenge again.'));
-        }
-    }
-
-    /**
      * Discard spam silently: the bot receives a success response and nothing is stored.
      */
     protected function failedValidation(Validator $validator): void
     {
-        if (! $validator->errors()->hasAny(['hp_check', 'hp_time', 'captcha_answer'])) {
+        if (! $validator->errors()->hasAny(['hp_check', 'hp_time'])) {
             parent::failedValidation($validator);
 
             return;

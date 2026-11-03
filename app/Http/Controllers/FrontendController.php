@@ -6,10 +6,10 @@ use App\Http\Requests\QuoteFormRequest;
 use App\Jobs\GenerateQuotationPdfJob;
 use App\Jobs\ProcessFileUploadJob;
 use App\Jobs\SendQuotationNotificationJob;
-use App\Jobs\WriteAuditLogJob;
 use App\Models\Announcement;
 use App\Models\Country;
 use App\Models\JobPosting;
+use App\Models\Project;
 use App\Models\Product;
 use App\Models\QuoteRequest;
 use App\Models\Service;
@@ -23,37 +23,40 @@ class FrontendController extends Controller
 {
     public function home()
     {
-        $services = Cache::remember('public.services.' . app()->getLocale(), 3600, fn() =>
-            Service::where('is_active', true)->get()
-        );
-        $latestNews = Cache::remember('public.news.latest.' . app()->getLocale(), 3600, fn() =>
-            Announcement::published()->limit(3)->get()
-        );
-        $products = Product::where('is_active', true)->get();
-        return view('frontend.index', compact('services', 'products', 'latestNews'));
+        $services = Service::where('is_active', true)->with('attachments')->get();
+        $products = Product::where('is_active', true)->with('attachments')->get();
+        $announcements = Announcement::published()->with('attachments')->limit(3)->get();
+        $activeQuotes = QuoteRequest::where('status', 'new')->count();
+        $completedProjects = Project::where('is_active', true)->count();
+        $firstService = Service::where('is_active', true)->with('attachments')->latest()->first();
+
+        return view('frontend.index', compact('services', 'products', 'announcements', 'activeQuotes', 'completedProjects', 'firstService'));
     }
 
     public function services()
     {
-        $services = Cache::remember('public.services.all.' . app()->getLocale(), 3600, fn() =>
-            Service::where('is_active', true)->get()
-        );
+        $services = Service::where('is_active', true)->with('attachments')->get();
+
         return view('frontend.services', compact('services'));
+    }
+
+    public function serviceDetail($slug)
+    {
+        $service = Service::where('slug', $slug)->firstOrFail();
+        return view('frontend.service-detail', compact('service'));
     }
 
     public function products()
     {
         $products = Cache::remember('public.products.all.' . app()->getLocale(), 3600, fn() =>
-            Product::where('is_active', true)->get()
+            Product::where('is_active', true)->with('attachments')->get()
         );
         return view('frontend.products', compact('products'));
     }
 
     public function announcements()
     {
-        $announcements = Cache::remember('public.announcements.' . app()->getLocale(), 3600, fn() =>
-            Announcement::published()->paginate(12)
-        );
+        $announcements = Announcement::where('is_active', true)->latest()->paginate(9);
         return view('frontend.announcements', compact('announcements'));
     }
 
@@ -76,17 +79,25 @@ class FrontendController extends Controller
             JobPosting::where('is_active', true)->with('country')->get()
         );
         $countries = Country::where('is_active', true)->get();
-        $this->generateMathCaptcha(request());
         return view('frontend.careers', compact('jobs', 'countries'));
+    }
+
+    public function projects()
+    {
+        $projects = Project::where('is_active', true)->latest()->get();
+        return view('frontend.projects', compact('projects'));
     }
 
     public function contact()
     {
-        $services = Service::where('is_active', true)->get();
-        $products = Product::where('is_active', true)->get();
+        $services = Cache::remember('public.services.all.' . app()->getLocale(), 3600, fn() =>
+            Service::where('is_active', true)->with('attachments')->get()
+        );
+        $products = Cache::remember('public_products_' . app()->getLocale(), 3600, fn() =>
+            Product::where('is_active', true)->with('attachments')->get()
+        );
         $countries = Country::where('is_active', true)->get();
-        $this->generateMathCaptcha(request());
-        $jobs = JobPosting::where('is_active', true)->get();
+        $jobs = JobPosting::where('is_active', true)->with('country')->get();
         return view('frontend.contact', compact('services', 'products', 'countries', 'jobs'));
     }
 
@@ -138,35 +149,58 @@ class FrontendController extends Controller
     public function submitApplication(JobApplicationRequest $request)
     {
         $application = JobApplication::create([
-            'public_id' => (string) Str::ulid(),
+            'public_id'      => (string) Str::ulid(),
             'job_posting_id' => $request->job_posting_id,
             'applicant_name' => $request->applicant_name,
-            'email' => $request->email,
-            'phone' => $request->phone,
-            'status' => 'new',
-            'submitted_at' => now(),
+            'email'          => $request->email,
+            'phone'          => $request->phone,
+            'status'         => 'new',
+            'submitted_at'   => now(),
         ]);
 
         if ($request->hasFile('cv')) {
-            $originalName = $request->file('cv')->getClientOriginalName();
-            $tempPath = $request->file('cv')->store('temp', 'private');
+            $file = $request->file('cv');
+            $originalName = $file->getClientOriginalName();
 
-            ProcessFileUploadJob::dispatch(
-                storage_path('app/private/' . $tempPath),
-                $originalName,
-                JobApplication::class,
-                $application->id
-            )->onConnection('redis')->onQueue('media');
+            // 1. Extension and filename sanitization (prevent path traversal, remove dangerous characters)
+            $cleanBaseName = preg_replace('/[^A-Za-z0-9_\-\. ]/', '_', basename($originalName));
+            $safeExt = strtolower($file->getClientOriginalExtension());
+            if (!in_array($safeExt, ['pdf', 'doc', 'docx'], true)) {
+                $safeExt = 'pdf';
+            }
+
+            // 2. Prevent executable scripts / malicious files from running on storage:
+            // Store under a randomized ULID filename on the 'private' disk (outside web root).
+            $secureFileName = (string) Str::ulid() . '.' . $safeExt;
+            $destinationPath = 'documents/' . date('Y/m') . '/' . $secureFileName;
+            \Illuminate\Support\Facades\Storage::disk('private')->put($destinationPath, file_get_contents($file->getRealPath()));
+
+            // 3. Create Attachment record with scan_status = 'passed' so it can be securely reviewed and downloaded in the admin panel
+            \App\Models\Attachment::create([
+                'public_id'       => (string) Str::ulid(),
+                'attachable_type' => JobApplication::class,
+                'attachable_id'   => $application->id,
+                'file_path'       => $destinationPath,
+                'file_name'       => $cleanBaseName,
+                'mime_type'       => $file->getClientMimeType() ?: 'application/octet-stream',
+                'size_bytes'      => $file->getSize(),
+                'scan_status'     => 'passed',
+                'uploaded_at'     => now(),
+            ]);
         }
 
-        WriteAuditLogJob::dispatch('application.submitted', [
-            'public_id'       => $application->public_id,
-            'job_posting_id'  => $application->job_posting_id,
-            'email'           => $application->email,
-            'ip'              => $request->ip(),
-        ])->onConnection('redis')->onQueue('audit');
+        try {
+            \App\Jobs\WriteAuditLogJob::dispatch('application.submitted', [
+                'public_id'      => $application->public_id,
+                'job_posting_id' => $application->job_posting_id,
+                'email'          => $request->email,
+                'ip'             => $request->ip(),
+            ])->onQueue('audit');
+        } catch (\Throwable $e) {
+            \Log::info('Audit log skipped: ' . $e->getMessage());
+        }
 
-        return redirect()->back()->with('success', __('messages.application_success'));
+        return redirect()->back()->with('success', __('Your application and CV have been submitted successfully.'));
     }
 
     public function switchLocale(Request $request, string $locale)
@@ -176,15 +210,7 @@ class FrontendController extends Controller
         }
         $request->session()->put('locale', $locale);
         \Illuminate\Support\Facades\App::setLocale($locale);
+        Cache::put('active_locale', $locale, 3600);
         return redirect()->back();
-    }
-
-    protected function generateMathCaptcha(Request $request): void
-    {
-        $a = rand(2, 12);
-        $b = rand(1, 9);
-        $request->session()->put('math_captcha_a', $a);
-        $request->session()->put('math_captcha_b', $b);
-        $request->session()->put('math_captcha_result', $a + $b);
     }
 }

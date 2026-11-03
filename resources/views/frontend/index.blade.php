@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ app()->getLocale() }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,7 +8,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
 :root{
@@ -30,6 +30,8 @@ body{
     color:var(--ink);
     overflow-x:hidden;
 }
+html[dir="rtl"] body{font-family:"Cairo",sans-serif}
+html[dir="rtl"] h1,html[dir="rtl"] h2,html[dir="rtl"] h3,html[dir="rtl"] h4,html[dir="rtl"] .brand{font-family:"Cairo",sans-serif}
 a{text-decoration:none;color:inherit}
 button{font:inherit}
 img{display:block;width:100%}
@@ -580,7 +582,75 @@ footer{
     padding-top:20px;
     color:#566574;
     font-size:8px;letter-spacing:.15em;
+/* ---------------- ANNOUNCEMENTS PREVIEW ---------------- */
+.announcements-sec{
+    padding:115px 0;
+    background:#ffffff;
+    border-top:1px solid var(--line);
+    border-bottom:1px solid var(--line);
+}
+.news-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+    gap:30px;
+    margin-top:45px;
+}
+.news-card{
+    background:var(--paper);
+    border:1px solid var(--line);
+    padding:32px 28px;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    transition:.35s;
+    position:relative;
+}
+.news-card:hover{
+    transform:translateY(-5px);
+    border-color:var(--yellow);
+    background:#fff;
+    box-shadow:0 14px 35px rgba(7,19,33,.07);
+}
+.news-meta{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-size:10px;
+    font-weight:800;
     text-transform:uppercase;
+    letter-spacing:.14em;
+    color:var(--blue);
+    margin-bottom:14px;
+}
+.news-meta time{color:var(--muted)}
+.news-card h3{
+    font-family:Manrope,sans-serif;
+    font-size:22px;
+    margin-bottom:12px;
+    line-height:1.25;
+    letter-spacing:-.03em;
+}
+.news-card p{
+    font-size:13px;
+    color:var(--muted);
+    line-height:1.75;
+    margin-bottom:24px;
+    flex-grow:1;
+}
+.news-link{
+    font-size:10px;
+    font-weight:800;
+    text-transform:uppercase;
+    letter-spacing:.16em;
+    color:var(--ink);
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    transition:.25s;
+}
+.news-card:hover .news-link{
+    color:var(--yellow);
+    gap:12px;
 }
 
 /* ---------------- REVEALS ---------------- */
@@ -654,22 +724,22 @@ footer{
 
 <header class="nav">
     <div class="nav-inner">
-        <a class="brand" href="#home">
-            <span class="brand-mark"></span>
-            BETA
-        </a>
+    <a class="brand" href="{{ route('home') }}"><span class="brand-mark"></span>BETA</a>
 
         <nav class="nav-links" id="nav">
-            <a href="#home">Home</a>
-            <a href="#solutions">Solutions</a>
-            <a href="#process">Capabilities</a>
-            <a href="#projects">Projects</a>
-            <a href="#contact">Contact</a>
+            <a href="{{ route('home') }}" @class(['active' => request()->routeIs('home')]) data-i18n="nav.home">Home</a>
+            <a href="{{ route('about') }}" @class(['active' => request()->routeIs('about')]) data-i18n="nav.about">About</a>
+            <a href="{{ route('services') }}" @class(['active' => request()->routeIs('services')]) data-i18n="nav.services">Services</a>
+            <a href="{{ route('products') }}" @class(['active' => request()->routeIs('products')]) data-i18n="nav.products">Products</a>
+            <a href="{{ route('projects') }}" @class(['active' => request()->routeIs('projects')]) data-i18n="nav.projects">Projects & Sectors</a>
+            <a href="{{ route('announcements') }}" @class(['active' => request()->routeIs('announcements*')]) data-i18n="nav.news">Announcements</a>
+            <a href="{{ route('careers') }}" @class(['active' => request()->routeIs('careers*')]) data-i18n="nav.careers">Careers</a>
+            <a href="{{ route('contact') }}" @class(['active' => request()->routeIs('contact')]) data-i18n="nav.contact">Contact</a>
         </nav>
 
         <div class="nav-right">
-            <span class="lang">EN</span>
-            <a class="quote" href="#contact">Request a Quote →</a>
+            <a href="{{ route('locale.switch', app()->getLocale() === 'ar' ? 'en' : 'ar') }}" class="lang" style="color:white;text-decoration:none;font-weight:700;">{{ app()->getLocale() === 'ar' ? 'EN' : 'عربي' }}</a>
+            <a class="quote" href="{{ route('contact') }}">Request a Quote →</a>
             <button class="menu" id="menu" aria-label="Menu">☰</button>
         </div>
     </div>
@@ -684,7 +754,14 @@ footer{
     <div class="blue-wash"></div>
 
     <div class="hero-content">
-        <div class="overline"><i></i> Industrial Engineering & Steel Structures</div>
+        <div class="overline">
+            {{ __('app.services') }}
+            @if($firstService?->getTranslated('title'))
+                {{ $firstService?->getTranslated('title') }}
+            @else
+                Industrial Engineering & Steel Structures
+            @endif
+        </div>
 
         <h1>
             WE BUILD<br>
@@ -700,7 +777,7 @@ footer{
 
         <div class="hero-actions">
             <a href="#solutions" class="btn primary">Explore Solutions <b>↗</b></a>
-            <a href="#contact" class="btn">Start a Project <b>→</b></a>
+            <a href="{{ route('contact') }}" class="btn">Start a Project <b>→</b></a>
         </div>
     </div>
 
@@ -744,7 +821,12 @@ footer{
 <!-- MOVING STATEMENT -->
 <div class="marquee" aria-hidden="true">
     <div class="marquee-track">
-        <span>ENGINEER <b>✦</b> MANUFACTURE <b>✦</b> INSTALL <b>✦</b> ENGINEER <b>✦</b> MANUFACTURE <b>✦</b> INSTALL <b>✦</b></span>
+        <span>
+            {{ __('app.services') }} <b>✦</b>
+            {{ $firstService?->getTranslated('title') ? ucfirst($firstService?->getTranslated('title')) : 'MANUFACTURE' }} <b>✦</b>
+            INSTALL <b>✦</b>
+            {{ $firstService?->getTranslated('title') ? ucfirst($firstService?->getTranslated('title')) : 'MANUFACTURE' }}
+        </span>
         <span>ENGINEER <b>✦</b> MANUFACTURE <b>✦</b> INSTALL <b>✦</b> ENGINEER <b>✦</b> MANUFACTURE <b>✦</b> INSTALL <b>✦</b></span>
     </div>
 </div>
@@ -764,33 +846,15 @@ footer{
         </div>
 
         <div class="solution-list">
-            <a class="solution reveal" href="{{ route('services') }}">
-                <span class="solution-no">01</span>
-                <h3>Steel Structures</h3>
-                <p>Structural systems engineered for commercial, industrial and infrastructure applications.</p>
-                <span class="solution-arrow">↗</span>
-            </a>
-
-            <a class="solution reveal" href="{{ route('services') }}">
-                <span class="solution-no">02</span>
-                <h3>Metal Fabrication</h3>
-                <p>High-precision fabrication for architectural and industrial requirements.</p>
-                <span class="solution-arrow">↗</span>
-            </a>
-
-            <a class="solution reveal" href="{{ route('services') }}">
-                <span class="solution-no">03</span>
-                <h3>Waste Solutions</h3>
-                <p>Purpose-built systems and structures designed around operational requirements.</p>
-                <span class="solution-arrow">↗</span>
-            </a>
-
-            <a class="solution reveal" href="{{ route('services') }}">
-                <span class="solution-no">04</span>
-                <h3>Custom Solutions</h3>
-                <p>Project-specific engineering, custom dimensions and one-off fabrication.</p>
-                <span class="solution-arrow">↗</span>
-            </a>
+            @forelse(($services ?? collect())->take(4) as $index => $service)
+                <a class="solution reveal" href="{{ route('services') }}">
+                    <span class="solution-no">{{ $index + 1 }}</span>
+                    <h3>{{ $service?->getTranslated('title') }}</h3>
+                    <p>{{ $service?->getTranslated('description') }}</p>
+                    <span class="solution-arrow">↗</span>
+                </a>
+            @empty
+            @endforelse
         </div>
     </div>
 </section>
@@ -870,14 +934,59 @@ footer{
     </div>
 </section>
 
+<!-- ANNOUNCEMENTS PREVIEW -->
+<section class="announcements-sec" id="announcements">
+    <div class="container">
+        <div class="section-heading reveal">
+            <div>
+                <div class="label">05 / Latest Updates</div>
+                <h2>News &amp; Engineering<br>Insights.</h2>
+            </div>
+            <div>
+                <p>Stay informed on our latest projects, company news, and technical innovations.</p>
+                <div style="margin-top:15px;">
+                    <a href="{{ route('announcements') }}" class="btn" style="color:var(--ink);border-color:var(--ink);">View All Announcements <b>↗</b></a>
+                </div>
+            </div>
+        </div>
+
+        <div class="news-grid">
+            @forelse($announcements ?? [] as $item)
+                <article class="news-card reveal">
+                    <div>
+                        <div class="news-meta">
+                            <span>{{ ucfirst($item->type ?? 'news') }}</span>
+                            <time datetime="{{ $item->published_at?->format('Y-m-d') }}">{{ $item->published_at?->format('M d, Y') ?? '—' }}</time>
+                        </div>
+                        <h3><a href="{{ route('announcements.show', $item->public_id) }}">{{ $item->getTranslated('title') }}</a></h3>
+                        <p>{{ \Illuminate\Support\Str::limit(strip_tags($item->getTranslated('excerpt') ?: $item->getTranslated('content')), 130) }}</p>
+                    </div>
+                    <div>
+                        <a href="{{ route('announcements.show', $item->public_id) }}" class="news-link">
+                            Read Update <b>→</b>
+                        </a>
+                    </div>
+                </article>
+            @empty
+                <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted);border:1px dashed var(--line);">
+                    <p>New announcements and project updates will be posted here soon.</p>
+                </div>
+            @endforelse
+        </div>
+    </div>
+</section>
+
 <!-- CTA -->
 <section class="cta" id="contact">
     <div class="container cta-inner reveal">
         <div>
-            <div class="label">05 / Start a Conversation</div>
+            <div class="label">06 / Start a Conversation</div>
             <h2>Have a project<br>in mind?</h2>
         </div>
-        <a href="mailto:info@beta-industries.com" class="btn">Talk to Engineering <b>↗</b></a>
+        <div style="display:flex;gap:15px;flex-wrap:wrap;">
+            <a href="{{ route('contact') }}" class="btn" style="background:var(--ink);color:var(--yellow);border-color:var(--ink);">Request a Quote <b>↗</b></a>
+            <a href="mailto:info@beta-industries.com" class="btn" style="background:transparent;color:var(--ink);border-color:var(--ink);">Talk to Engineering <b>✉</b></a>
+        </div>
     </div>
 </section>
 
@@ -887,7 +996,7 @@ footer{
     <div class="container">
         <div class="footer-top">
             <div>
-                <a class="brand" href="#home"><span class="brand-mark"></span>BETA</a>
+                <a class="brand" href="{{ route('home') }}"><span class="brand-mark"></span>BETA</a>
                 <p class="footer-desc">
                     Engineering, manufacturing and installation of
                     industrial metal and steel solutions.
@@ -897,19 +1006,19 @@ footer{
             <div class="footer-columns">
                 <div class="footer-col">
                     <h4>Explore</h4>
-                    <a href="#solutions">Solutions</a>
+                    <a href="{{ route('services') }}">Solutions</a>
                     <a href="#process">Capabilities</a>
-                    <a href="#projects">Projects</a>
+                    <a href="{{ route('projects') }}">Projects</a>
                 </div>
                 <div class="footer-col">
                     <h4>Company</h4>
                     <a href="{{ route('about') }}">About BETA</a>
-                    <a href="{{ route('about') }}">Quality</a>
-                    <a href="{{ route('announcements') }}">Insights</a>
+                    <a href="{{ route('careers') }}">Careers</a>
+                    <a href="{{ route('announcements') }}">Announcements &amp; Insights</a>
                 </div>
                 <div class="footer-col">
                     <h4>Contact</h4>
-                    <a href="#contact">Request a Quote</a>
+                    <a href="{{ route('contact') }}">Request a Quote</a>
                     <a href="mailto:info@beta-industries.com">Email</a>
                 </div>
             </div>
@@ -927,17 +1036,19 @@ footer{
 const menu = document.getElementById("menu");
 const nav = document.getElementById("nav");
 
-menu.addEventListener("click", () => {
-    nav.classList.toggle("mobile");
-    menu.textContent = nav.classList.contains("mobile") ? "×" : "☰";
-});
-
-nav.querySelectorAll("a").forEach(link => {
-    link.addEventListener("click", () => {
-        nav.classList.remove("mobile");
-        menu.textContent = "☰";
+if (menu && nav) {
+    menu.addEventListener("click", () => {
+        nav.classList.toggle("mobile");
+        menu.textContent = nav.classList.contains("mobile") ? "×" : "☰";
     });
-});
+
+    nav.querySelectorAll("a").forEach(link => {
+        link.addEventListener("click", () => {
+            nav.classList.remove("mobile");
+            menu.textContent = "☰";
+        });
+    });
+}
 
 /* Native reveal animation — no GSAP, no library */
 const revealObserver = new IntersectionObserver((entries) => {

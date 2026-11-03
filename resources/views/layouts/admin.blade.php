@@ -4,9 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>@yield('title', 'BETA Admin') — Executive Command Center</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" as="font" type="font/woff2" crossorigin="anonymous" href="https://fonts.gstatic.com/s/dmsans/v17/S6iyxHM7mQe2DLoOaUWtN6cAwmOf.woff2">
+    <link rel="preload" as="font" type="font/woff2" crossorigin="anonymous" href="https://fonts.gstatic.com/s/manrope/v25/h8QIQ9c-bxvJyJQ5u0nNE6RobXCl.woff2">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts" defer></script>
 <style>
 :root{
     --sun:#F2A900; --ocean:#003087; --ink:#071321; --charcoal:#1a202c;
@@ -105,7 +109,22 @@ tr:hover td{background:#fafbfc}
 .profit-display .profit-value{font-size:28px;font-weight:800;color:var(--green)}
 .profit-display small{font-size:11px;color:#276749}
 
-/* FLASH */
+/* RTL OVERRIDES — applied when html[dir="rtl"] */
+html[dir="rtl"] .sidebar { right: auto; left: 0; }
+html[dir="rtl"] .topbar-left { flex-direction: row-reverse; }
+html[dir="rtl"] .page-breadcrumb { margin-right: 0; margin-left: 100px; }
+html[dir="rtl"] table th { text-align: right; }
+html[dir="rtl"] table td { text-align: right; }
+html[dir="rtl"] .flex-between { flex-direction: row-reverse; }
+html[dir="rtl"] .metric-grid .metric-card { text-align: right; }
+html[dir="rtl"] .profit-display { text-align: right; }
+html[dir="rtl"] .form-grid { grid-template-columns: 1fr 1fr; }
+html[dir="rtl"] .form-group.full { grid-column: auto; }
+html[dir="rtl"] .nav-item { justify-content: flex-start; }
+html[dir="rtl"] .nav-item .icon { margin-right: 6px; margin-left: 0; }
+
+/* Badge mirroring for Arabic */
+html[dir="rtl"] .badge { transform: scaleX(-1); transform-origin: left; }
 .flash-success{background:#f0fff4;border:1px solid #9ae6b4;color:#276749;padding:14px 18px;border-radius:8px;margin-bottom:20px;font-size:13px;font-weight:600}
 .flash-error{background:#fff5f5;border:1px solid #feb2b2;color:var(--red);padding:14px 18px;border-radius:8px;margin-bottom:20px;font-size:13px}
 
@@ -177,7 +196,7 @@ tr:hover td{background:#fafbfc}
                 <div style="font-size:11px;color:var(--muted)">{{ Str::upper(Auth::user()->role) }}</div>
             </div>
             <div class="avatar">{{ strtoupper(substr(Auth::user()->name, 0, 2)) }}</div>
-            @endauth
+            @endauth>
         </div>
     </header>
 

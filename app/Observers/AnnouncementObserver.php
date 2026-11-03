@@ -3,54 +3,46 @@
 namespace App\Observers;
 
 use App\Models\Announcement;
-use App\Services\AuditLogService;
 use Illuminate\Support\Facades\Cache;
 
-/**
- * Flushes the public announcements/news cache and audits catalog edits.
- */
 class AnnouncementObserver
 {
-    public function __construct(private AuditLogService $audit) {}
-
-    public function saved(Announcement $announcement): void
+    /**
+     * Handle the Announcement "created" event.
+     */
+    public function created(Announcement $model): void
     {
-        $this->flush();
+        $this->clearAnnouncementCaches($model);
     }
 
-    public function created(Announcement $announcement): void
+    /**
+     * Handle the Announcement "updated" event.
+     */
+    public function updated(Announcement $model): void
     {
-        $this->audit->logModelEvent($announcement, 'catalog.announcement.created');
+        $this->clearAnnouncementCaches($model);
     }
 
-    public function updated(Announcement $announcement): void
+    /**
+     * Handle the Announcement "deleted" event.
+     */
+    public function deleted(Announcement $model): void
     {
-        $this->flush();
-        $this->audit->logModelEvent($announcement, 'catalog.announcement.updated');
+        $this->clearAnnouncementCaches($model);
     }
 
-    public function deleted(Announcement $announcement): void
+    /**
+     * Clear all announcement-related caches.
+     */
+    protected function clearAnnouncementCaches(Announcement $model): void
     {
-        $this->flush();
-        $this->audit->logModelEvent($announcement, 'catalog.announcement.deleted');
-    }
-
-    public function restored(Announcement $announcement): void
-    {
-        $this->flush();
-        $this->audit->logModelEvent($announcement, 'catalog.announcement.restored');
-    }
-
-    public function forceDeleted(Announcement $announcement): void
-    {
-        $this->flush();
-        $this->audit->logModelEvent($announcement, 'catalog.announcement.force_deleted');
-    }
-
-    private function flush(): void
-    {
-        foreach (Announcement::cacheKeys() as $key) {
-            Cache::forget($key);
+        $locales = ['en', 'ar'];
+        foreach ($locales as $locale) {
+            Cache::forget("public.announcements.{$locale}");
+            Cache::forget("public.news.latest.{$locale}");
+            foreach (Announcement::cacheKeys() as $key) {
+                Cache::forget($key);
+            }
         }
     }
 }

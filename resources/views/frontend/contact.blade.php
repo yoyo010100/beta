@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="{{ app()->getLocale() }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BETA — Contact & Careers</title>
+<title>BETA — Request a Quote & Contact</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
@@ -41,16 +41,13 @@ main { min-height: calc(100vh - var(--header-height)); padding-top: var(--header
 .form-group input, .form-group select, .form-group textarea { padding: 15px; border: 1px solid var(--line); background: var(--paper); font-family: inherit; }
 .form-group textarea { min-height: 120px; }
 .captcha-row { display: flex; align-items: center; gap: 12px; }
-.captcha-row .captcha-question { font-weight: 800; letter-spacing: .04em; background: var(--paper); border: 1px solid var(--line); padding: 15px 18px; white-space: nowrap; }
-.captcha-row input { flex: 1; padding: 15px; border: 1px solid var(--line); background: var(--paper); font-family: inherit; }
 /* Honeypot: invisible to humans, present for bots */
 .hp-field { position: absolute !important; left: -9999px !important; top: -9999px !important; width: 1px !important; height: 1px !important; overflow: hidden !important; opacity: 0 !important; pointer-events: none !important; }
 .submit-btn { background: var(--ink); color: var(--sun); padding: 18px; width: 100%; border: none; font-weight: 800; text-transform: uppercase; cursor: pointer; transition: 0.3s; }
 .submit-btn:hover { background: var(--ocean); color: var(--white); }
-
-footer { padding: 80px 0 30px; background: var(--ink); color: var(--white); }
-.footer-top { display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.15); padding-bottom: 45px; }
-.footer-bottom { display: flex; justify-content: space-between; padding-top: 25px; font-size: 10px; color: #566574; text-transform: uppercase; letter-spacing: .15em; }
+        .spinner { display: inline-block; width: 1rem; height: 1rem; vertical-align: middle; border: 0.25em solid currentColor; border-radius: 50%; border-top-color: transparent; animation: spin 0.8s ease-in-out infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .spinner.hidden { display: none; }
 </style>
 </head>
 <body>
@@ -63,83 +60,93 @@ footer { padding: 80px 0 30px; background: var(--ink); color: var(--white); }
             <a href="{{ route('services') }}" @class(['active' => request()->routeIs('services')]) data-i18n="nav.services">Services</a>
             <a href="{{ route('products') }}" @class(['active' => request()->routeIs('products')]) data-i18n="nav.products">Products</a>
             <a href="{{ route('projects') }}" @class(['active' => request()->routeIs('projects')]) data-i18n="nav.projects">Projects</a>
-            <a href="{{ route('contact') }}" @class(['active' => request()->routeIs('contact')]) data-i18n="nav.contact">Contact & Careers</a>
+            <a href="{{ route('announcements') }}" @class(['active' => request()->routeIs('announcements*')]) data-i18n="nav.news">Announcements</a>
+            <a href="{{ route('careers') }}" @class(['active' => request()->routeIs('careers*')]) data-i18n="nav.careers">Careers</a>
+            <a href="{{ route('contact') }}" @class(['active' => request()->routeIs('contact')]) data-i18n="nav.contact">Contact</a>
         </nav>
         <div class="nav-right">
-            <button class="lang-switch" onclick="toggleLanguage()"><span id="lang-en" class="active-lang">EN</span> | <span id="lang-ar">عربي</span></button>
+            <a href="{{ route('locale.switch', app()->getLocale() === 'ar' ? 'en' : 'ar') }}" class="lang-switch" style="text-decoration:none;"><span class="active-lang">{{ app()->getLocale() === 'ar' ? 'EN' : 'عربي' }}</span></a>
         </div>
     </div>
 </header>
 
 <main class="section-pad">
     <div class="container">
+        @if(session('success') || session('quote_submitted'))
+            <div style="background:#f0fff4;color:#276749;border:1px solid #c6f6d5;padding:16px 20px;border-radius:6px;margin-bottom:24px;font-weight:600;">
+                ✓ {{ session('success') ?? __('Your quote request has been submitted successfully! Our engineering team will review it shortly.') }}
+            </div>
+        @endif
+
+        @if($errors->any())
+            <div style="background:#fff5f5;color:#c53030;border:1px solid #feb2b2;padding:16px 20px;border-radius:6px;margin-bottom:24px;">
+                <ul style="margin-left:20px;">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
         <div class="tabs">
-            <button class="tab-btn active" onclick="switchForm('quote')" id="btn-quote" data-i18n="tab.quote">Request a Quote</button>
-            <button class="tab-btn" onclick="switchForm('career')" id="btn-career" data-i18n="tab.career">Join Our Team (Careers)</button>
+            <button class="tab-btn active" id="btn-quote" data-i18n="tab.quote">Request a Quote</button>
         </div>
 
         <!-- FORM 1: REQUEST QUOTE -->
-        <div class="form-box" id="form-quote">
+        <div class="form-box fade-in-up" id="form-quote">
             <h2 style="margin-bottom:30px;" data-i18n="q.title">Project Quotation & Inquiries</h2>
-            <form action="{{ route('quote.submit') }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('quote.submit') }}" method="POST" enctype="multipart/form-data" id="quoteForm">
                 @csrf
-                <!-- Anti-spam: honeypot (hidden) + math captcha -->
+                <!-- Anti-spam: honeypot (hidden) -->
                 <div class="hp-field" aria-hidden="true">
                     <label for="quote-hp-check">Do not fill this field</label>
                     <input type="text" id="quote-hp-check" name="hp_check" tabindex="-1" autocomplete="off">
                 </div>
-                <input type="hidden" id="quote-hp-time" name="hp_time" value="">
-                <div class="form-grid">
-                    <div class="form-group"><label data-i18n="f.name">Full Name *</label><input type="text" name="client_name" required></div>
-                    <div class="form-group"><label data-i18n="f.email">Email Address *</label><input type="email" name="email" required></div>
-                    <div class="form-group"><label data-i18n="f.company">Company Name</label><input type="text" name="company_name"></div>
-                    <div class="form-group"><label data-i18n="f.phone">Phone Number *</label><input type="tel" name="phone" required></div>
-                    <div class="form-group full"><label data-i18n="f.boq">Upload Drawing / BOQ (PDF)</label><input type="file" name="drawing" accept=".pdf,.dwg"></div>
-                    <div class="form-group full"><label data-i18n="f.details">Project Scope & Details</label><textarea name="client_message" required></textarea></div>
-                    <div class="form-group full">
-                        <label data-i18n="f.captcha">Security Check *</label>
-                        <div class="captcha-row">
-                            <span class="captcha-question" id="quote-captcha-question">&nbsp;</span>
-                            <input type="number" name="captcha_answer" id="quote-captcha" required autocomplete="off" inputmode="numeric" aria-label="Captcha answer">
-                        </div>
-                    </div>
-                </div>
-                <button type="submit" class="submit-btn" data-i18n="f.submitQ">Submit Quote Request</button>
-            </form>
-        </div>
-
-        <!-- FORM 2: CAREERS -->
-        <div class="form-box" id="form-career" style="display:none;">
-            <h2 style="margin-bottom:30px;" data-i18n="c.title">Career Application</h2>
-            <form action="{{ route('application.submit') }}" method="POST" enctype="multipart/form-data">
-                @csrf
-                <!-- Anti-spam: honeypot (hidden) + math captcha -->
                 <div class="hp-field" aria-hidden="true">
-                    <label for="career-hp-check">Do not fill this field</label>
-                    <input type="text" id="career-hp-check" name="hp_check" tabindex="-1" autocomplete="off">
+                    <input type="text" name="website_url_hp" tabindex="-1" autocomplete="off">
                 </div>
-                <input type="hidden" id="career-hp-time" name="hp_time" value="">
-                <div class="form-grid">
-                    <div class="form-group"><label data-i18n="f.name">Full Name *</label><input type="text" name="applicant_name" required></div>
-                    <div class="form-group"><label data-i18n="f.email">Email Address *</label><input type="email" name="email" required></div>
-                    <div class="form-group full"><label data-i18n="c.pos">Target Position *</label>
-                        <select name="job_posting_id" required>
-                            <option value="">Select Position</option>
-                            @foreach($jobs as $job)
-                            <option value="{{ $job->id }}">{{ $job->getTranslated('title') }} ({{ $job->country?->name }})</option>
+                <input type="hidden" id="quote-hp-time" name="hp_time" value="">
+                <!-- Service/Product/Country Dropdowns -->
+                <div class="form-grid" style="margin-bottom:20px;">
+                    <div class="form-group"><label>Interested Service</label>
+                        <select name="service_id" class="form-select">
+                            <option value="">Select Service</option>
+                            @foreach($services as $service)
+                            <option value="{{ $service->id }}" @selected(old('service_id') == $service->id)>{{ $service->getTranslated('title') }}</option>
                             @endforeach
                         </select>
                     </div>
-                    <div class="form-group full"><label data-i18n="c.cv">Upload CV / Resume (PDF) *</label><input type="file" name="cv" accept=".pdf" required></div>
-                    <div class="form-group full">
-                        <label data-i18n="f.captcha">Security Check *</label>
-                        <div class="captcha-row">
-                            <span class="captcha-question" id="career-captcha-question">&nbsp;</span>
-                            <input type="number" name="captcha_answer" id="career-captcha" required autocomplete="off" inputmode="numeric" aria-label="Captcha answer">
-                        </div>
+                    <div class="form-group"><label>Interested Product</label>
+                        <select name="product_id" class="form-select">
+                            <option value="">Select Product</option>
+                            @foreach($products as $product)
+                            <option value="{{ $product->id }}" @selected(old('product_id') == $product->id)>{{ $product->getTranslated('title') }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Country</label>
+                        <select name="country_id" class="form-select">
+                            <option value="">Select Country</option>
+                            @foreach($countries as $country)
+                            <option value="{{ $country->id }}" @selected(old('country_id') == $country->id)>{{ $country->name }}</option>
+                            @endforeach
+                        </select>
                     </div>
                 </div>
-                <button type="submit" class="submit-btn" data-i18n="c.submitC">Submit Job Application</button>
+                <div class="form-grid">
+                    <div class="form-group"><label data-i18n="f.name">Full Name *</label><input type="text" name="client_name" value="{{ old('client_name') }}" required></div>
+                    <div class="form-group"><label data-i18n="f.email">Email Address *</label><input type="email" name="email" value="{{ old('email') }}" required></div>
+                    <div class="form-group"><label data-i18n="f.company">Company Name</label><input type="text" name="company_name" value="{{ old('company_name') }}"></div>
+                    <div class="form-group"><label data-i18n="f.phone">Phone Number *</label><input type="tel" name="phone" value="{{ old('phone') }}" required></div>
+                    <div class="form-group full"><label data-i18n="f.boq">Upload Drawing / BOQ (PDF, DWG)</label><input type="file" name="drawing" accept=".pdf,.dwg,.dxf,.jpg,.png"></div>
+                    <div class="form-group full"><label data-i18n="f.details">Project Scope & Details *</label><textarea name="client_message" required>{{ old('client_message') }}</textarea></div>
+                    <div class="form-group full">
+                        <button type="submit" class="submit-btn" id="quoteSubmitBtn" data-i18n="f.submitQ">
+                            <span id="quoteSubmitText">Submit Quote Request</span>
+                            <span id="quoteSubmitSpinner" class="spinner hidden" role="status" aria-hidden="true"></span>
+                        </button>
+                    </div>
+                </div>
             </form>
         </div>
     </div>
@@ -169,47 +176,44 @@ footer { padding: 80px 0 30px; background: var(--ink); color: var(--white); }
     function updateLang() { document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr'; document.documentElement.lang = currentLang; document.getElementById('lang-en').className = currentLang === 'en' ? 'active-lang' : ''; document.getElementById('lang-ar').className = currentLang === 'ar' ? 'active-lang' : ''; document.querySelectorAll('[data-i18n]').forEach(e => { const t = resolvePath(e.getAttribute('data-i18n'), translations[currentLang]); if(t) e.innerHTML = t; }); }
     function toggleLanguage() { currentLang = currentLang === 'en' ? 'ar' : 'en'; localStorage.setItem('beta_lang', currentLang); updateLang(); }
 
-    // ---- Anti-spam: math captcha + honeypot ----
-    const captchaAnswers = {};
-    function initCaptcha(key) {
-        const a = Math.floor(Math.random() * 9) + 1;
-        const b = Math.floor(Math.random() * 9) + 1;
-        captchaAnswers[key] = a + b;
-        const q = document.getElementById(key + '-captcha-question');
-        if (q) q.textContent = `${a} + ${b} =`;
-        const t = document.getElementById(key + '-hp-time');
-        if (t) t.value = Date.now();
-    }
-    function handleSubmit(event, key) {
-        event.preventDefault();
-        const form = event.target;
+    // ---- Anti-spam: honeypot + time-trap ----
+    document.addEventListener("DOMContentLoaded", function() {
+        // Timestamp trap: record page-load time
+        var hpTime = document.getElementById('quote-hp-time');
+        if (hpTime) hpTime.value = Date.now();
 
-        // 1) Honeypot: bots tend to fill every field.
-        const hpCheck = form.elements['hp_check'];
-        if (hpCheck && hpCheck.value.trim() !== '') return;
+        var form = document.getElementById('quoteForm');
+        if (form) {
+            form.addEventListener('submit', function(event) {
+                // 1) Honeypot: bots tend to fill every field
+                var hpCheck = form.elements['hp_check'];
+                if (hpCheck && hpCheck.value.trim() !== '') {
+                    event.preventDefault();
+                    return false;
+                }
 
-        // 2) Time trap: reject impossibly fast (scripted) submissions.
-        const hpTime = parseInt((form.elements['hp_time'] || {}).value, 10) || 0;
-        if (hpTime && Date.now() - hpTime < 3000) {
-            alert('Form submitted too quickly. Please try again.');
-            return;
+                // 2) Time trap check
+                var hpTimeVal = parseInt(form.elements['hp_time'] ? form.elements['hp_time'].value : 0, 10) || 0;
+                if (hpTimeVal && Date.now() - hpTimeVal < 2000) {
+                    event.preventDefault();
+                    alert('Please wait a moment before submitting.');
+                    return false;
+                }
+
+                // Submit animation: disable button, show spinner
+                var btn = document.getElementById('quoteSubmitBtn');
+                var submitText = document.getElementById('quoteSubmitText');
+                var submitSpinner = document.getElementById('quoteSubmitSpinner');
+                if (btn && submitText && submitSpinner) {
+                    btn.disabled = true;
+                    submitText.classList.add('hidden');
+                    submitSpinner.classList.remove('hidden');
+                }
+
+                return true;
+            });
         }
-
-        // 3) Math captcha.
-        const answer = parseInt((form.elements['captcha'] || {}).value, 10);
-        if (answer !== captchaAnswers[key]) {
-            alert('Incorrect security answer. Please try again.');
-            form.elements['captcha'].value = '';
-            initCaptcha(key);
-            return;
-        }
-
-        alert(key === 'quote' ? 'Quote Request Sent!' : 'Application Submitted!');
-        form.reset();
-        initCaptcha(key);
-    }
-
-    document.addEventListener("DOMContentLoaded", () => { updateLang(); initCaptcha('quote'); initCaptcha('career'); });
+    });
 </script>
 </body>
 </html>

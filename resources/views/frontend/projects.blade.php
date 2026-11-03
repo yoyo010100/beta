@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="{{ app()->getLocale() }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,7 +8,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
 <style>
-:root { --sun: #F2A900; --ocean: #003087; --midnight: #00205B; --sky: #307FE2; --ink: #071321; --paper: #F4F2EB; --white: #FFFFFF; --muted: #66717c; --line: rgba(7, 19, 33, 0.15); --max: 1380px; --header-height: 92px; }
+:root { --sun: #F2A900; --ocean: #00205B; --sky: #307FE2; --ink: #071321; --paper: #F4F2EB; --white: #FFFFFF; --muted: #66717c; --line: rgba(7, 19, 33, 0.15); --max: 1380px; --header-height: 92px; }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: "DM Sans", sans-serif; background: var(--paper); color: var(--ink); overflow-x: hidden; line-height: 1.6; }
 html[dir="rtl"] body { font-family: "Cairo", sans-serif; }
@@ -89,10 +89,12 @@ footer { padding: 80px 0 30px; background: var(--ink); color: var(--white); }
             <a href="{{ route('services') }}" @class(['active' => request()->routeIs('services')]) data-i18n="nav.services">Services</a>
             <a href="{{ route('products') }}" @class(['active' => request()->routeIs('products')]) data-i18n="nav.products">Products</a>
             <a href="{{ route('projects') }}" @class(['active' => request()->routeIs('projects')]) data-i18n="nav.projects">Projects & Sectors</a>
+            <a href="{{ route('announcements') }}" @class(['active' => request()->routeIs('announcements*')]) data-i18n="nav.news">Announcements</a>
+            <a href="{{ route('careers') }}" @class(['active' => request()->routeIs('careers*')]) data-i18n="nav.careers">Careers</a>
             <a href="{{ route('contact') }}" @class(['active' => request()->routeIs('contact')]) data-i18n="nav.contact">Contact</a>
         </nav>
         <div class="nav-right">
-            <button class="lang-switch" onclick="toggleLanguage()"><span id="lang-en" class="active-lang">EN</span> | <span id="lang-ar">عربي</span></button>
+            <a href="{{ route('locale.switch', app()->getLocale() === 'ar' ? 'en' : 'ar') }}" class="lang-switch" style="text-decoration:none;"><span class="active-lang">{{ app()->getLocale() === 'ar' ? 'EN' : 'عربي' }}</span></a>
             <a class="quote" href="{{ route('contact') }}" data-i18n="nav.quote">Request Quote</a>
         </div>
     </div>
@@ -117,41 +119,19 @@ footer { padding: 80px 0 30px; background: var(--ink); color: var(--white); }
             </div>
 
             <div class="projects-grid">
-                <div class="project-card gsap-fade-up" data-category="industrial">
-                    <div class="project-img-box">
-                        <span class="project-badge">Industrial</span>
-                        <img src="https://images.unsplash.com/photo-1589939705384-5185137a7f0f?auto=format&fit=crop&w=800&q=80" alt="Logistics Hub">
+                @foreach ($projects as $project)
+                    <div class="project-card gsap-fade-up {{ $project->category }}">
+                        <div class="project-img-box">
+                            <span class="project-badge">{{ ucfirst(__('categories.'.$project->category)) }}</span>
+                            <img src="{{ $project->image_path }}" alt="{{ $project->getTranslated('title') }}">
+                        </div>
+                        <div class="project-content">
+                            <h3>{{ $project->getTranslated('title') }}</h3>
+                            <p>{{ $project->getTranslated('description') }}</p>
+                            <button class="project-link" onclick="openModal('{{ $project->public_id }}')" data-i18n="p.readCase">View Case Study →</button>
+                        </div>
                     </div>
-                    <div class="project-content">
-                        <h3 data-i18n="p.p1.t">Al-Zamil Logistics Hub</h3>
-                        <p data-i18n="p.p1.d">10,000 sqm heavy steel warehouse facility engineered with high wind-load tolerance in Jeddah, KSA[cite: 2].</p>
-                        <button class="project-link" onclick="openModal('p1')" data-i18n="p.readCase">View Case Study →</button>
-                    </div>
-                </div>
-
-                <div class="project-card gsap-fade-up" data-category="commercial">
-                    <div class="project-img-box">
-                        <span class="project-badge">Commercial</span>
-                        <img src="https://images.unsplash.com/photo-1541888087401-443b35f60641?auto=format&fit=crop&w=800&q=80" alt="Commercial Tower">
-                    </div>
-                    <div class="project-content">
-                        <h3 data-i18n="p.p2.t">Cairo Executive Tower</h3>
-                        <p data-i18n="p.p2.d">Complex internal structural mezzanine and architectural steel framing for multi-story headquarters[cite: 2].</p>
-                        <button class="project-link" onclick="openModal('p2')" data-i18n="p.readCase">View Case Study →</button>
-                    </div>
-                </div>
-
-                <div class="project-card gsap-fade-up" data-category="infra">
-                    <div class="project-img-box">
-                        <span class="project-badge">Infrastructure</span>
-                        <img src="https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?auto=format&fit=crop&w=800&q=80" alt="Bridge Framework">
-                    </div>
-                    <div class="project-content">
-                        <h3 data-i18n="p.p3.t">Highway Flyover Beams</h3>
-                        <p data-i18n="p.p3.d">Heavy plate girder fabrication and galvanizing for critical transport infrastructure[cite: 2].</p>
-                        <button class="project-link" onclick="openModal('p3')" data-i18n="p.readCase">View Case Study →</button>
-                    </div>
-                </div>
+                @endforeach
             </div>
         </div>
     </section>
@@ -160,11 +140,11 @@ footer { padding: 80px 0 30px; background: var(--ink); color: var(--white); }
     <section class="section-pad sectors-sec">
         <div class="container">
             <div class="label" style="color:var(--sun)" data-i18n="sec.label">Cross-Industry Expertise</div>
-            <h2 style="font-size:38px; line-height:1.1;" data-i18n="sec.title">Sectors We Empower Across Egypt & KSA</h2>
+            <h2 style="font-size:38px; line-height:1.1;" data-i18n="sec.title">Sectors We Empower Across Egypt & KSA</div>
             <div class="sectors-grid">
                 <div class="sector-card gsap-fade-up"><h4 data-i18n="sec.s1">Industrial & Manufacturing</h4><p data-i18n="sec.s1d">Factories, assembly lines, overhead crane gantries[cite: 2].</p></div>
                 <div class="sector-card gsap-fade-up"><h4 data-i18n="sec.s2">Logistics & Warehousing</h4><p data-i18n="sec.s2d">Wide-span clear buildings, high-bay distribution hubs[cite: 2].</p></div>
-                <div class="sector-card gsap-fade-up"><h4 data-i18n="sec.s3">Energy & Petrochemicals</h4><p data-i18n="sec.s3d">Heavy pipe racks, platform structures, protective coatings[cite: 2].</p></div>
+                <div classsector-card gsap-fade-up"><h4 data-i18n="sec.s3">Energy & Petrochemicals</h4><p data-i18n="sec.s3d">Heavy pipe racks, platform structures, protective coatings[cite: 2].</p></div>
                 <div class="sector-card gsap-fade-up"><h4 data-i18n="sec.s4">Commercial & Real Estate</h4><p data-i18n="sec.s4d">Multi-story framing, high-end canopies, decorative facades[cite: 2].</p></div>
             </div>
         </div>
@@ -188,9 +168,11 @@ footer { padding: 80px 0 30px; background: var(--ink); color: var(--white); }
 
 <script>
     const modalData = {
-        p1: { title: "Al-Zamil Logistics Hub", location: "Jeddah, KSA", scope: "10,000 sqm steel fabrication, galvanizing, site erection", desc: "Delivered under tight 8-month deadline utilizing ASTM A992 structural steel designed for coastal wind environments[cite: 2]." },
-        p2: { title: "Cairo Executive Tower", location: "Cairo, Egypt", scope: "Internal structural steel framing & mezzanine decks", desc: "Engineered high-yield interior columns to allow column-free floor plans across 5 executive floors[cite: 2]." },
-        p3: { title: "Highway Flyover Beams", location: "Giza, Egypt", scope: "Heavy plate girders & bridge deck supports", desc: "Fabricated over 2,500 tons of heavy structural steel with 100% NDT ultrasonic weld inspection[cite: 2]." }
+        {{ $projects->map(function ($p) {
+            $desc = $p->description[app()->getLocale() ?? 'en'];
+            $cat = ucfirst($p->category);
+            return "'" . $p->public_id . "': { title: '" . $p->getTranslated('title') . "', location: '" . ucfirst($p->client_name) . "', scope: '" . addslashes($desc) . "', desc: '" . addslashes($desc) . "' };
+        })->implode(',') }
     };
 
     function filterProjects(cat) {
@@ -207,6 +189,7 @@ footer { padding: 80px 0 30px; background: var(--ink); color: var(--white); }
 
     function openModal(id) {
         const data = modalData[id];
+        if (!data) return;
         document.getElementById('modalContent').innerHTML = `
             <h2 style="font-size:32px; margin-bottom:10px;">${data.title}</h2>
             <p style="color:var(--ocean); font-weight:bold; margin-bottom:20px;">📍 ${data.location}</p>
@@ -220,7 +203,7 @@ footer { padding: 80px 0 30px; background: var(--ink); color: var(--white); }
 
     const translations = {
         en: { nav: { home: "Home", about: "About", services: "Services", products: "Products", projects: "Projects & Sectors", contact: "Contact", quote: "Request Quote" }, p: { label: "Proven Footprint", title: "Engineered Heavy <br>Structures.", fAll: "All Sectors", fInd: "Industrial & Logistics", fCom: "Commercial", fInf: "Infrastructure", readCase: "View Case Study →", p1: { t: "Al-Zamil Logistics Hub", d: "10,000 sqm heavy steel warehouse facility engineered with high wind-load tolerance in Jeddah, KSA[cite: 2]." }, p2: { t: "Cairo Executive Tower", d: "Complex internal structural mezzanine and architectural steel framing for multi-story headquarters[cite: 2]." }, p3: { t: "Highway Flyover Beams", d: "Heavy plate girder fabrication and galvanizing for critical transport infrastructure[cite: 2]." } }, sec: { label: "Cross-Industry Expertise", title: "Sectors We Empower Across Egypt & KSA", s1: "Industrial & Manufacturing", s1d: "Factories, assembly lines, overhead crane gantries[cite: 2].", s2: "Logistics & Warehousing", s2d: "Wide-span clear buildings, high-bay distribution hubs[cite: 2].", s3: "Energy & Petrochemicals", s3d: "Heavy pipe racks, platform structures, protective coatings[cite: 2].", s4: "Commercial & Real Estate", s4d: "Multi-story framing, high-end canopies, decorative facades[cite: 2]." }, footer: { tagline: "Engineer. Manufacture. Install." } },
-        ar: { nav: { home: "الرئيسية", about: "عن الشركة", services: "الخدمات", products: "المنتجات", projects: "المشاريع والقطاعات", contact: "اتصل بنا", quote: "طلب عرض سعر" }, p: { label: "سجل حافل", title: "هياكل ثقيلة <br>مهندسة بدقة.", fAll: "جميع القطاعات", fInd: "الصناعي واللوجستي", fCom: "التجاري", fInf: "البنية التحتية", readCase: "عرض دراسة الحالة ←", p1: { t: "مركز لوجستيات الزامل", d: "مستودع صلب ثقيل بمساحة 10,000 متر مربع مصمم لتحمل الرياح العالية في جدة[cite: 2]." }, p2: { t: "برج القاهرة التنفيذي", d: "ميزانين إنشائي داخلي معقد وإطار صلب معماري للمقر الرئيسي[cite: 2]." }, p3: { t: "كمرات الكباري والطرُق", d: "تصنيع وتصفيح الكمرات اللوحية الثقيلة للبنية التحتية الحيوية للنقل[cite: 2]." } }, sec: { label: "خبرة متقاطعة", title: "القطاعات التي ندعمها في مصر والسعودية", s1: "الصناعة والتصنيع", s1d: "المصانع، خطوط التجميع، وهياكل الرافعة الجسرية[cite: 2].", s2: "اللوجستيات والمستودعات", s2d: "مباني واسعة الامتداد، ومراكز توزيع مرتفعة[cite: 2].", s3: "الطاقة والبتروكيماويات", s3d: "حوامل الأنابيب الثقيلة، المنصات، وطلاءات الحماية[cite: 2].", s4: "التجاري والعقارات", s4d: "إطارات متعددة الطوابق، مظلات فاخرة، وواجهات ديكورية[cite: 2]." }, footer: { tagline: "هندسة. تصنيع. تركيب." } }
+        ar: { nav: { home: "الرئيسية", about: "عن الشركة", services: "الخدمات", products: "المنتجات", projects: "المشاريع والقطاعات", contact: "اتصل بنا", quote: "طلب عرض سعيد" }, p: { label: "سجل حافل", title: "هياكل ثقيلة <br>مهندسة بدقة.", fAll: "جميع القطاعات", fInd: "الصناعي واللوجستي", fCom: "التجاري", fInf: "البنية التحتية", readCase: "عرض دراسة الحالة ←", p1: { t: "مركز لوجستيات الزامل", d: "مستودع صلب ثقيل بمساحة 10,000 متر مربع مصمم لتحمل الرياح العالية في جدة[cite: 2]." }, p2: { t: "برج القاهرة التنفيذي", d: "ميزانين إنشائي داخلي معقد وإطار صلب معماري للمقر الرئيسي[cite: 2]." }, p3: { t: "كمرات الكباري والطرُق", d: "تصنيع وتصفيح الكمرات اللوحية الثقيلة للبنية التحتية الحيوية للنقل[cite: 2]." } }, sec: { label: "خبرة متقاطعة", title: "القطاعات التي ندعمها في مصر والسعودية", s1: "الصناعة والتصنيع", s1d: "المصانع، خطوط التجميع، وهياكل الرافعة الجسرية[cite: 2].", s2: "اللوجستيات والمستودعات", s2d: "مباني واسعة الامتداد، ومراكز توزيع مرتفعة[cite: 2].", s3: "الطاقة والبتروكيماويات", s3d: "حوامل الأنابيب الثقيلة، المنصات، وطلاءات الحماية[cite: 2].", s4: "التجاري والعقارات", s4d: "إطارات متعددة الطوابق، مظلات فاخرة، وواجهات ديكورية[cite: 2]." }, footer: { tagline: "هندسة. تصنيع. تركيب." } }
     };
 
     let currentLang = localStorage.getItem('beta_lang') || 'en';

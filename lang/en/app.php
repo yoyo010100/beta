@@ -82,4 +82,37 @@ return [
         'quote_success' => 'Quote request received! Our sales team will contact you within one business day.',
         'application_success' => 'Application received! We will review it and be in touch soon.',
     ],
+
+    // ADMIN
+    'admin' => [
+        'dashboard' => 'Executive Dashboard',
+        'metrics' => [
+            'total_pipeline_value' => 'Total Pipeline Value',
+            'active_rfqs' => 'Active RFQs',
+            'current_projects' => 'Current Active Projects',
+            'hiring_pipeline' => 'Hiring Pipeline',
+        ],
+        'welcome_back' => 'Welcome back',
+        'q3_performance_summary' => 'Here is your Q3 enterprise performance summary',
+        'generate_q3_report' => 'Generate Q3 Report',
+        'table' => [
+            'headers' => [
+                'spec_id' => 'Spec ID',
+                'product_name' => 'Product Name',
+                'material_grade' => 'Material Grade',
+                'category' => 'Category',
+                'datasheet' => 'Datasheet',
+                'last_updated' => 'Last Updated',
+                'actions' => 'Actions',
+            ],
+        ],
+        'catalog' => [
+            'add_product' => 'Add Product',
+        ],
+        'badge' => [
+            'new_review' => 'New Review',
+            'pricing_dept' => 'Pricing Dept',
+            'quote_sent' => 'Quote Sent',
+        ],
+    ],
 ];

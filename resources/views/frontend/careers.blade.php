@@ -71,8 +71,7 @@
     </div>
 </section>
 
-<!-- 02 / Application Form (only when there is at least one posting to apply for) -->
-@if($jobs->count())
+<!-- 02 / Application Form -->
 <section class="section-pad" id="apply">
     <div class="container">
         <div class="label-tag label-tag-ocean">{{ $ar ? '02 / التقديم' : '02 / Application' }}</div>
@@ -82,9 +81,24 @@
         </p>
 
         <div class="form-box">
-            <form action="{{ route('application.submit') }}" method="POST" enctype="multipart/form-data">
+            @if(session('success'))
+                <div class="mb-6 p-4 bg-green-50 text-green-800 border border-green-200 rounded text-sm font-semibold">
+                    ✓ {{ session('success') }}
+                </div>
+            @endif
+            @if($errors->any())
+                <div class="mb-6 p-4 bg-red-50 text-red-800 border border-red-200 rounded text-sm">
+                    <ul class="list-disc pl-5">
+                        @foreach($errors->all() as $err)
+                            <li>{{ $err }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            <form action="{{ route('application.submit') }}" method="POST" enctype="multipart/form-data" id="careerForm">
                 @csrf
-                <!-- Anti-spam: honeypot (hidden) + math captcha -->
+                <!-- Anti-spam: honeypot (hidden) -->
                 <div class="hp-field" aria-hidden="true">
                     <label for="apply-hp-check">Do not fill this field</label>
                     <input type="text" id="apply-hp-check" name="hp_check" tabindex="-1" autocomplete="off">
@@ -110,8 +124,8 @@
                     </div>
                     <div class="form-group">
                         <label for="job_posting_id">{{ $t('careers.field_job', 'Position') }} *</label>
-                        <select id="job_posting_id" name="job_posting_id" required>
-                            <option value="">{{ $t('careers.select_job', 'Select Position') }}</option>
+                        <select id="job_posting_id" name="job_posting_id">
+                            <option value="">{{ $t('careers.select_job', 'Select Position / General Application') }}</option>
                             @foreach($jobs as $job)
                                 <option value="{{ $job->id }}" @selected(old('job_posting_id') == $job->id)>
                                     {{ $job->getTranslated('title') }} ({{ $job->country?->name }})
@@ -120,28 +134,19 @@
                         </select>
                     </div>
                     <div class="form-group full">
-                        <label for="apply-cv">{{ $t('careers.field_cv', 'Upload CV / Resume') }} *</label>
-                        <input type="file" id="apply-cv" name="cv" accept=".pdf,application/pdf" required>
-                        {{-- Validation only accepts PDF up to 10 MB (JobApplicationRequest) — ar.json's careers.upload_cv_label is outdated, so use accurate text. --}}
-                        <small class="text-[11px] text-muted">{{ $ar ? 'ملف PDF فقط — حد أقصى 10 ميجابايت' : 'PDF only — max 10 MB' }}</small>
+                        <label data-i18n="c.cv">Upload CV / Resume (PDF, DOC, DOCX) *</label>
+                        <input type="file" id="apply-cv" name="cv" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" required>
+                        <small class="text-[11px] text-muted">{{ $ar ? 'ملفات PDF أو DOC أو DOCX — حد أقصى 10 ميجابايت' : 'PDF, DOC, or DOCX only — max 10 MB' }}</small>
                     </div>
+
                     <div class="form-group full">
-                        <label for="apply-captcha">{{ $ar ? 'التحقق الأمني *' : 'Security Check *' }}</label>
-                        <div class="captcha-row">
-                            <span class="captcha-question" aria-hidden="true">
-                                {{ session('math_captcha_a', '?') }} + {{ session('math_captcha_b', '?') }} =
-                            </span>
-                            <input type="number" id="apply-captcha" name="captcha_answer" required autocomplete="off" inputmode="numeric" aria-label="Captcha answer" placeholder="{{ __('app.contact.captcha_placeholder') }}">
-                        </div>
+                        <button type="submit" class="submit-btn" id="careerSubmitBtn">{{ $t('careers.submit_button', 'Submit Application') }}</button>
                     </div>
                 </div>
-
-                <button type="submit" class="submit-btn">{{ $t('careers.submit_button', 'Submit Application') }}</button>
             </form>
         </div>
     </div>
 </section>
-@endif
 
 <!-- Stats band (matches about page stats-banner) -->
 <section class="gsap-fade-up" style="background: var(--ink); color: var(--white); padding: 60px 0;">
@@ -193,10 +198,6 @@
     .form-group select { padding: 15px; border: 1px solid var(--line); background: var(--paper); font-family: inherit; font-size: 14px; color: var(--ink); transition: border-color 0.2s; }
     .form-group input:focus,
     .form-group select:focus { outline: none; border-color: var(--ocean); }
-    .captcha-row { display: flex; align-items: center; gap: 12px; }
-    .captcha-row .captcha-question { font-weight: 800; letter-spacing: .04em; background: var(--paper); border: 1px solid var(--line); padding: 15px 18px; white-space: nowrap; }
-    .captcha-row input { flex: 1; padding: 15px; border: 1px solid var(--line); background: var(--paper); font-family: inherit; font-size: 14px; }
-    .captcha-row input:focus { outline: none; border-color: var(--ocean); }
     /* Honeypot: invisible to humans, present for bots */
     .hp-field { position: absolute !important; left: -9999px !important; top: -9999px !important; width: 1px !important; height: 1px !important; overflow: hidden !important; opacity: 0 !important; pointer-events: none !important; }
     .submit-btn { background: var(--ink); color: var(--sun); padding: 18px; width: 100%; border: none; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; font-family: inherit; font-size: 12px; cursor: pointer; transition: 0.3s; }
@@ -205,7 +206,6 @@
     @media (max-width: 768px) {
         .form-grid { grid-template-columns: 1fr; }
         .form-box { padding: 30px 20px; }
-        .captcha-row { flex-direction: column; align-items: stretch; }
     }
 </style>
 @endpush
@@ -224,6 +224,33 @@
                 if (select) select.value = btn.dataset.jobId;
             });
         });
+
+        // Submit handler for Careers form
+        var form = document.getElementById('careerForm');
+        if (form) {
+            form.addEventListener('submit', function(event) {
+                // Honeypot check
+                var hpCheck = form.elements['hp_check'];
+                if (hpCheck && hpCheck.value.trim() !== "") {
+                    event.preventDefault();
+                    return false;
+                }
+                // Time trap check
+                var hpTimeVal = parseInt(form.elements['hp_time'] ? form.elements['hp_time'].value : 0, 10) || 0;
+                if (hpTimeVal && Date.now() - hpTimeVal < 2000) {
+                    event.preventDefault();
+                    alert('Please wait a moment before submitting.');
+                    return false;
+                }
+                // Submit animation
+                var btn = form.querySelector('button[type="submit"]');
+                if (btn) {
+                    btn.disabled = true;
+                    btn.textContent = 'Submitting...';
+                }
+                return true;
+            });
+        }
     });
 </script>
 @endpush

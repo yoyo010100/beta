@@ -45,7 +45,11 @@
                             @method('DELETE')
                             <button type="submit" class="btn btn-danger btn-sm">Archive</button>
                         </form>
+                        @if($product->wasRecentlyRestored())
+                            <span class="text-green-500 text-sm mt-1">Restored!</span>
+                        @endif
                     @else
+                        <a href="{{ route('admin.products.restore', $product->public_id) }}" class="btn btn-success btn-sm mt-1">Restore / Undo</a>
                         <span style="font-size:11px;color:var(--muted)">Archived — no actions</span>
                     @endif
                 </td>

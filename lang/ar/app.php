@@ -74,12 +74,45 @@ return [
         'working_hours' => 'ساعات العمل',
         'hours_detail' => 'الأحد — الخميس، 8:00 ص — 5:00 م',
         'no_prices_heading' => 'ملاحظة مهمة',
-        'no_prices_body' => 'لا تعرض بيتا الصناعية أسعاراً عامة. يتم تحديد التسعير بشكل مخصص بناءً على متطلبات كل مشروع.',
+        'no_prices_body' => 'لاعرض بيتا الصناعية أسعاراً عامة. يتم تحديد التسعير بشكل مخصص بناءً على متطلبات كل مشروع.',
     ],
 
     // MESSAGES
     'messages' => [
         'quote_success' => 'تم استلام طلب عرض السعر! سيتواصل معك فريقنا خلال يوم عمل.',
         'application_success' => 'تم تلقي طلبك! سنراجعه ونتواصل معك قريباً.',
+    ],
+
+    // ADMIN
+    'admin' => [
+        'dashboard' => 'لوحة القيادة التنفيذية',
+        'metrics' => [
+            'total_pipeline_value' => 'إجمالي قيمة pipeline',
+            'active_rfqs' => 'RFQs نشطة',
+            'current_projects' => 'المشاريع النشطة',
+            'hiring_pipeline' => 'مسار التوظيف',
+        ],
+        'welcome_back' => 'مرحباً بعودتك',
+        'q3_performance_summary' => 'إليك ملخص أداء الربع الثالث',
+        'generate_q3_report' => 'إنشاء تقرير الربع الثالث',
+        'table' => [
+            'headers' => [
+                'spec_id' => 'معرف المواصفة',
+                'product_name' => 'اسم المنتج',
+                'material_grade' => 'درجة المادة',
+                'category' => 'الفئة',
+                'datasheet' => 'الكترونية',
+                'last_updated' => 'آخر تحديث',
+                'actions' => 'الإجراءات',
+            ],
+        ],
+        'catalog' => [
+            'add_product' => 'إضافة منتج',
+        ],
+        'badge' => [
+            'new_review' => 'مراجعة جديدة',
+            'pricing_dept' => 'قطاع التسعير',
+            'quote_sent' => 'عرضsent',
+        ],
     ],
 ];

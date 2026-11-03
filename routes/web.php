@@ -27,14 +27,17 @@ Route::get('/locale/{locale}', [FrontendController::class, 'switchLocale'])
 Route::middleware(['throttle:180,1'])->group(function () {
     Route::get('/', [FrontendController::class, 'home'])->name('home');
     Route::get('/services', [FrontendController::class, 'services'])->name('services');
+    Route::get('/services/{slug}', [FrontendController::class, 'serviceDetail'])->name('service.detail');
     Route::get('/products', [FrontendController::class, 'products'])->name('products');
     Route::get('/news', [FrontendController::class, 'announcements'])->name('announcements');
+    Route::get('/announcements', [FrontendController::class, 'announcements'])->name('announcements.index');
     Route::get('/news/{announcement:public_id}', [FrontendController::class, 'announcementShow'])->name('announcements.show')->whereUlid('announcement');
+    Route::get('/announcements/{announcement:public_id}', [FrontendController::class, 'announcementShow'])->whereUlid('announcement');
     Route::get('/insights/{announcement:public_id}', [FrontendController::class, 'insightDetail'])->name('insights.show')->whereUlid('announcement');
     Route::get('/careers', [FrontendController::class, 'careers'])->name('careers');
     Route::get('/contact', [FrontendController::class, 'contact'])->name('contact');
     Route::view('/about', 'frontend.about')->name('about');
-    Route::view('/projects', 'frontend.projects')->name('projects');
+    Route::get('/projects', [FrontendController::class, 'projects'])->name('projects');
 });
 
 // ─── PUBLIC FORM SUBMISSIONS (15/hour per IP + Honeypot + Math CAPTCHA) ─────
@@ -74,6 +77,7 @@ Route::prefix('admin')->name('admin.')->middleware(['admin'])->group(function ()
         Route::put('/products/{product:public_id}', [CatalogController::class, 'productUpdate'])->name('products.update')->whereUlid('product');
         Route::delete('/products/{product:public_id}', [CatalogController::class, 'productDestroy'])->name('products.destroy')->whereUlid('product');
         Route::post('/products/{product:public_id}/attachments', [CatalogController::class, 'productAttachmentStore'])->name('products.attachments.store')->whereUlid('product');
+        Route::post('/admin/catalog/products/{id}/restore', [CatalogController::class, 'restoreProduct'])->name('admin.products.restore');
 
         // Services
         Route::get('/services', [CatalogController::class, 'servicesIndex'])->name('services');

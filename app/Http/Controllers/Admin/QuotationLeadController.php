@@ -65,7 +65,6 @@ class QuotationLeadController extends Controller
                 'currency_id' => $validated['currency_id'],
                 'factory_cost' => $validated['factory_cost'],
                 'selling_price' => $validated['selling_price'],
-                'profit_amount' => $profitAmount,
                 'admin_notes' => $validated['admin_notes'],
                 'status' => 'sent_to_client',
             ]

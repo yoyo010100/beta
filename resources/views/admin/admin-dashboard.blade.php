@@ -72,14 +72,29 @@ tr:hover { background: #f9fafb; }
     <div class="sidebar-header"><div class="brand"><span class="brand-mark"></span>BETA Admin</div></div>
     <nav class="nav-menu">
         <span class="nav-label">Core Modules</span>
-        <a href="admin-dashboard.html" class="nav-item active">📊 Executive Dashboard</a>
-        <a href="admin-leads.html" class="nav-item">📩 1. Quotation Leads</a>
-        <a href="admin-catalog.html" class="nav-item">📦 2. Product Catalog</a>
-        <a href="admin-portfolio.html" class="nav-item">🏗️ 3. Projects Portfolio</a>
+        <a href="{{ route('admin.dashboard') }}" @class(['nav-item', 'active' => request()->routeIs('admin.dashboard')])>
+            <span class="icon">📊</span> {{ __('admin.dashboard') }}
+        </a>
+        <a href="{{ route('admin.leads.index') }}" @class(['nav-item', 'active' => request()->routeIs('admin.leads*')])>
+            <span class="icon">📩</span> {{ __('admin.leads') }}
+        </a>
+        <a href="{{ route('admin.catalog.products') }}" @class(['nav-item', 'active' => request()->routeIs('admin.catalog.products*')])>
+            <span class="icon">📦</span> {{ __('admin.catalog.products') }}
+        </a>
+        <a href="{{ route('admin.catalog.services') }}" @class(['nav-item', 'active' => request()->routeIs('admin.catalog.services*')])>
+            <span class="icon">⚙️</span> {{ __('admin.catalog.services') }}
+        </a>
+
         <span class="nav-label" style="margin-top: 30px;">Content & HR</span>
-        <a href="admin-blog.html" class="nav-item">📝 4. Insights & Blog</a>
-        <a href="admin-careers.html" class="nav-item">👥 5. Job Applicants</a>
-        <a href="admin-resources.html" class="nav-item">📂 6. Resource Center</a>
+        <a href="{{ route('admin.announcements.index') }}" @class(['nav-item', 'active' => request()->routeIs('admin.announcements*')])>
+            <span class="icon">📢</span> {{ __('admin.announcements') }}
+        </a>
+        <a href="{{ route('admin.careers.index') }}" @class(['nav-item', 'active' => request()->routeIs('admin.careers.index') || request()->routeIs('admin.careers.show')])>
+            <span class="icon">👥</span> {{ __('admin.careers') }}
+        </a>
+        <a href="{{ route('admin.careers.postings') }}" @class(['nav-item', 'active' => request()->routeIs('admin.careers.postings*')])>
+            <span class="icon">💼</span> {{ __('admin.careers.postings') }}
+        </a>
     </nav>
 </aside>
 
@@ -94,22 +109,22 @@ tr:hover { background: #f9fafb; }
 </html>
 <!-- Include Master Sidebar/Header Here -->
 <main class="main-content">
-    <header class="topbar"><div class="page-title">Executive Command Center</div><div class="user-profile"><span>Admin Manager</span><div class="avatar">AM</div></div></header>
+    <header class="topbar"><div class="page-title">{{ __('admin.dashboard') }}</div><div class="user-profile"><span>Admin Manager</span><div class="avatar">AM</div></div></header>
     
     <div class="wrapper">
         <div class="flex-between gsap-ui">
             <div>
-                <h2 style="font-size:24px; color:var(--ink);">Welcome back, Manager.</h2>
-                <p style="color:var(--muted); font-size:14px;">Here is your Q3 enterprise performance summary.</p>
+                <h2 style="font-size:24px; color:var(--ink);">{{ __('admin.welcome_back') }}</h2>
+                <p style="color:var(--muted); font-size:14px;">{{ __('admin.q3_performance_summary') }}</p>
             </div>
-            <button class="btn btn-outline">📅 Generate Q3 Report</button>
+            <button class="btn btn-outline">📅 {{ __('admin.generate_q3_report') }}</button>
         </div>
 
         <div class="metric-grid gsap-ui">
-            <div class="metric-card"><h4>Total Pipeline Value</h4><div class="value">$14.2M</div><span style="color:#38a169; font-size:12px; font-weight:700;">+ $2.1M this month</span></div>
-            <div class="metric-card"><h4>Active RFQs</h4><div class="value">48</div><span style="color:#e53e3e; font-size:12px; font-weight:700;">12 require attention</span></div>
-            <div class="metric-card"><h4>Current Active Projects</h4><div class="value">22</div><span style="color:#38a169; font-size:12px; font-weight:700;">On Schedule: 20</span></div>
-            <div class="metric-card"><h4>Hiring Pipeline</h4><div class="value">84</div><span style="color:#38a169; font-size:12px; font-weight:700;">New applicants: 15</span></div>
+            <div class="metric-card"><h4>{{ __('admin.metrics.total_pipeline_value') }}</h4><div class="value">$14.2M</div><span style="color:#38a169; font-size:12px; font-weight:700;">+ $2.1M this month</span></div>
+            <div class="metric-card"><h4>{{ __('admin.metrics.active_rfqs') }}</h4><div class="value">48</div><span style="color:#e53e3e; font-size:12px; font-weight:700;">12 require attention</span></div>
+            <div class="metric-card"><h4>{{ __('admin.metrics.current_projects') }}</h4><div class="value">22</div><span style="color:#38a169; font-size:12px; font-weight:700;">On Schedule: 20</span></div>
+            <div class="metric-card"><h4>{{ __('admin.metrics.hiring_pipeline') }}</h4><div class="value">84</div><span style="color:#38a169; font-size:12px; font-weight:700;">New applicants: 15</span></div>
         </div>
 
         <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px; margin-bottom: 30px;">

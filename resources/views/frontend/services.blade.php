@@ -82,22 +82,22 @@ footer { padding: 80px 0 30px; background: var(--ink); color: var(--white); }
             <div class="journey-step gsap-fade-up">
                 <div class="step-num">01</div>
                 <div class="step-body">
-                    <h3 style="font-size:22px; margin-bottom:10px;" data-i18n="s.st1.t">Engineering & Shop Drawings</h3>
-                    <p style="color:var(--muted);" data-i18n="s.st1.d">In-house structural analysis, Tekla 3D modeling, and approved shop drawings.</p>
+                    <h3 style="font-size:22px; margin-bottom:10px;" data-i18n="s.st1.t">{{ ($services ?? collect())->get(0)?->getTranslated('title') }}</h3>
+                    <p style="color:var(--muted);" data-i18n="s.st1.d">{{ ($services ?? collect())->get(0)?->getTranslated('description') }}</p>
                 </div>
             </div>
             <div class="journey-step gsap-fade-up">
                 <div class="step-num">02</div>
                 <div class="step-body">
-                    <h3 style="font-size:22px; margin-bottom:10px;" data-i18n="s.st2.t">Precision Fabrication</h3>
-                    <p style="color:var(--muted);" data-i18n="s.st2.d">CNC plasma cutting, automated beam welding, and quality assembly.</p>
+                    <h3 style="font-size:22px; margin-bottom:10px;" data-i18n="s.st2.t">{{ ($services ?? collect())->get(1)?->getTranslated('title') }}</h3>
+                    <p style="color:var(--muted);" data-i18n="s.st2.d">{{ ($services ?? collect())->get(1)?->getTranslated('description') }}</p>
                 </div>
             </div>
             <div class="journey-step gsap-fade-up">
                 <div class="step-num">03</div>
                 <div class="step-body">
-                    <h3 style="font-size:22px; margin-bottom:10px;" data-i18n="s.st3.t">Site Erection & Handover</h3>
-                    <p style="color:var(--muted);" data-i18n="s.st3.d">Certified erection crews equipped for heavy lifting and anchor installation.</p>
+                    <h3 style="font-size:22px; margin-bottom:10px;" data-i18n="s.st3.t">{{ ($services ?? collect())->get(2)?->getTranslated('title') }}</h3>
+                    <p style="color:var(--muted);" data-i18n="s.st3.d">{{ ($services ?? collect())->get(2)?->getTranslated('description') }}</p>
                 </div>
             </div>
         </div>
@@ -107,16 +107,17 @@ footer { padding: 80px 0 30px; background: var(--ink); color: var(--white); }
     <section class="section-pad" style="background:var(--white);">
         <div class="container">
             <div class="label" style="color:var(--ocean)" data-i18n="s.clabel">02 / Custom Solutions</div>
-            <h2 style="font-size:36px;" data-i18n="s.ctitle">Built Around Special Requirements</h2>
+            <h2 style="font-size:36px;" data-i18n="s.ctitle">Built Around Special Requirements</div>
             <div class="custom-grid">
-                <div class="custom-card gsap-fade-up">
-                    <h3 style="font-size:20px; margin-bottom:10px;" data-i18n="s.c1.t">Non-Standard Dimensions</h3>
-                    <p style="font-size:14px; color:var(--muted);" data-i18n="s.c1.d">Bespoke heavy framing tailored to unique site constraints.</p>
-                </div>
-                <div class="custom-card gsap-fade-up">
-                    <h3 style="font-size:20px; margin-bottom:10px;" data-i18n="s.c2.t">Special Protective Coatings</h3>
-                    <p style="font-size:14px; color:var(--muted);" data-i18n="s.c2.d">Hot-dip galvanizing, intumescent fireproofing, and marine-grade paint.</p>
-                </div>
+                @forelse(($services ?? collect())->take(2) as $index => $service)
+                    <div class="custom-card gsap-fade-up">
+                        <h3 style="font-size:20px; margin-bottom:10px;">
+                            <a href="{{ route('service.detail', $service->slug) }}" class="hover:text-ocean transition-colors">{{ $service?->getTranslated('title') }}</a>
+                        </h3>
+                        <p style="font-size:14px; color:var(--muted);">{{ $service?->getTranslated('description') }}</p>
+                    </div>
+                @empty
+                @endforelse
             </div>
         </div>
     </section>
