@@ -90,5 +90,6 @@ tr:hover { background: #f9fafb; }
         gsap.fromTo('.gsap-ui', { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, stagger: 0.1 });
     });
 </script>
+<x-success-modal />
 </body>
 </html>

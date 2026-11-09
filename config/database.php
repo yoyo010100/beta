@@ -2,6 +2,12 @@
 
 use Illuminate\Support\Str;
 
+// PHP 8.5 moved the MySQL PDO constants onto the Pdo\Mysql class and deprecated
+// the old PDO::MYSQL_ATTR_* aliases. Use the new constant when available.
+$mysqlSslCa = defined('Pdo\Mysql::ATTR_SSL_CA')
+    ? \Pdo\Mysql::ATTR_SSL_CA
+    : PDO::MYSQL_ATTR_SSL_CA;
+
 return [
 
     /*
@@ -58,7 +64,7 @@ return [
             'strict' => true,
             'engine' => null,
             'options' => extension_loaded('pdo_mysql') ? array_filter([
-                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+                $mysqlSslCa => env('MYSQL_ATTR_SSL_CA'),
             ]) : [],
         ],
 
@@ -78,7 +84,7 @@ return [
             'strict' => true,
             'engine' => null,
             'options' => extension_loaded('pdo_mysql') ? array_filter([
-                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+                $mysqlSslCa => env('MYSQL_ATTR_SSL_CA'),
             ]) : [],
         ],
 

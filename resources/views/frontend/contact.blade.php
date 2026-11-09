@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BETA — Request a Quote & Contact</title>
+<title>{{ __('app.contact.seo_title') }}</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
@@ -51,33 +51,10 @@ main { min-height: calc(100vh - var(--header-height)); padding-top: var(--header
 </style>
 </head>
 <body>
-<header class="nav">
-    <div class="nav-inner">
-        <a class="brand" href="{{ route('home') }}"><span class="brand-mark"></span>BETA</a>
-        <nav class="nav-links">
-            <a href="{{ route('home') }}" @class(['active' => request()->routeIs('home')]) data-i18n="nav.home">Home</a>
-            <a href="{{ route('about') }}" @class(['active' => request()->routeIs('about')]) data-i18n="nav.about">About</a>
-            <a href="{{ route('services') }}" @class(['active' => request()->routeIs('services')]) data-i18n="nav.services">Services</a>
-            <a href="{{ route('products') }}" @class(['active' => request()->routeIs('products')]) data-i18n="nav.products">Products</a>
-            <a href="{{ route('projects') }}" @class(['active' => request()->routeIs('projects')]) data-i18n="nav.projects">Projects</a>
-            <a href="{{ route('announcements') }}" @class(['active' => request()->routeIs('announcements*')]) data-i18n="nav.news">Announcements</a>
-            <a href="{{ route('careers') }}" @class(['active' => request()->routeIs('careers*')]) data-i18n="nav.careers">Careers</a>
-            <a href="{{ route('contact') }}" @class(['active' => request()->routeIs('contact')]) data-i18n="nav.contact">Contact</a>
-        </nav>
-        <div class="nav-right">
-            <a href="{{ route('locale.switch', app()->getLocale() === 'ar' ? 'en' : 'ar') }}" class="lang-switch" style="text-decoration:none;"><span class="active-lang">{{ app()->getLocale() === 'ar' ? 'EN' : 'عربي' }}</span></a>
-        </div>
-    </div>
-</header>
+<x-header />
 
 <main class="section-pad">
     <div class="container">
-        @if(session('success') || session('quote_submitted'))
-            <div style="background:#f0fff4;color:#276749;border:1px solid #c6f6d5;padding:16px 20px;border-radius:6px;margin-bottom:24px;font-weight:600;">
-                ✓ {{ session('success') ?? __('Your quote request has been submitted successfully! Our engineering team will review it shortly.') }}
-            </div>
-        @endif
-
         @if($errors->any())
             <div style="background:#fff5f5;color:#c53030;border:1px solid #feb2b2;padding:16px 20px;border-radius:6px;margin-bottom:24px;">
                 <ul style="margin-left:20px;">
@@ -89,12 +66,12 @@ main { min-height: calc(100vh - var(--header-height)); padding-top: var(--header
         @endif
 
         <div class="tabs">
-            <button class="tab-btn active" id="btn-quote" data-i18n="tab.quote">Request a Quote</button>
+            <button class="tab-btn active" id="btn-quote">{!! __('contact.tab.quote') !!}</button>
         </div>
 
         <!-- FORM 1: REQUEST QUOTE -->
         <div class="form-box fade-in-up" id="form-quote">
-            <h2 style="margin-bottom:30px;" data-i18n="q.title">Project Quotation & Inquiries</h2>
+            <h2 style="margin-bottom:30px;">{!! __('contact.q.title') !!}</h2>
             <form action="{{ route('quote.submit') }}" method="POST" enctype="multipart/form-data" id="quoteForm">
                 @csrf
                 <!-- Anti-spam: honeypot (hidden) -->
@@ -108,25 +85,25 @@ main { min-height: calc(100vh - var(--header-height)); padding-top: var(--header
                 <input type="hidden" id="quote-hp-time" name="hp_time" value="">
                 <!-- Service/Product/Country Dropdowns -->
                 <div class="form-grid" style="margin-bottom:20px;">
-                    <div class="form-group"><label>Interested Service</label>
+                    <div class="form-group"><label>{{ __('app.contact.field_service') }}</label>
                         <select name="service_id" class="form-select">
-                            <option value="">Select Service</option>
+                            <option value="">{{ __('app.contact.select_service') }}</option>
                             @foreach($services as $service)
                             <option value="{{ $service->id }}" @selected(old('service_id') == $service->id)>{{ $service->getTranslated('title') }}</option>
                             @endforeach
                         </select>
                     </div>
-                    <div class="form-group"><label>Interested Product</label>
+                    <div class="form-group"><label>{{ __('app.contact.field_product') }}</label>
                         <select name="product_id" class="form-select">
-                            <option value="">Select Product</option>
+                            <option value="">{{ __('app.contact.select_product') }}</option>
                             @foreach($products as $product)
                             <option value="{{ $product->id }}" @selected(old('product_id') == $product->id)>{{ $product->getTranslated('title') }}</option>
                             @endforeach
                         </select>
                     </div>
-                    <div class="form-group"><label>Country</label>
+                    <div class="form-group"><label>{{ __('app.contact.field_country') }}</label>
                         <select name="country_id" class="form-select">
-                            <option value="">Select Country</option>
+                            <option value="">{{ __('app.contact.select_country') }}</option>
                             @foreach($countries as $country)
                             <option value="{{ $country->id }}" @selected(old('country_id') == $country->id)>{{ $country->name }}</option>
                             @endforeach
@@ -134,17 +111,14 @@ main { min-height: calc(100vh - var(--header-height)); padding-top: var(--header
                     </div>
                 </div>
                 <div class="form-grid">
-                    <div class="form-group"><label data-i18n="f.name">Full Name *</label><input type="text" name="client_name" value="{{ old('client_name') }}" required></div>
-                    <div class="form-group"><label data-i18n="f.email">Email Address *</label><input type="email" name="email" value="{{ old('email') }}" required></div>
-                    <div class="form-group"><label data-i18n="f.company">Company Name</label><input type="text" name="company_name" value="{{ old('company_name') }}"></div>
-                    <div class="form-group"><label data-i18n="f.phone">Phone Number *</label><input type="tel" name="phone" value="{{ old('phone') }}" required></div>
-                    <div class="form-group full"><label data-i18n="f.boq">Upload Drawing / BOQ (PDF, DWG)</label><input type="file" name="drawing" accept=".pdf,.dwg,.dxf,.jpg,.png"></div>
-                    <div class="form-group full"><label data-i18n="f.details">Project Scope & Details *</label><textarea name="client_message" required>{{ old('client_message') }}</textarea></div>
+                    <div class="form-group"><label>{!! __('contact.f.name') !!}</label><input type="text" name="client_name" value="{{ old('client_name') }}" required></div>
+                    <div class="form-group"><label>{!! __('contact.f.email') !!}</label><input type="email" name="email" value="{{ old('email') }}" required></div>
+                    <div class="form-group"><label>{!! __('contact.f.company') !!}</label><input type="text" name="company_name" value="{{ old('company_name') }}"></div>
+                    <div class="form-group"><label>{!! __('contact.f.phone') !!}</label><input type="tel" name="phone" value="{{ old('phone') }}" required></div>
+                    <div class="form-group full"><label>{!! __('contact.f.boq') !!}</label><input type="file" name="drawing" accept=".pdf,.dwg,.dxf,.jpg,.png"></div>
+                    <div class="form-group full"><label>{!! __('contact.f.details') !!}</label><textarea name="client_message" required>{{ old('client_message') }}</textarea></div>
                     <div class="form-group full">
-                        <button type="submit" class="submit-btn" id="quoteSubmitBtn" data-i18n="f.submitQ">
-                            <span id="quoteSubmitText">Submit Quote Request</span>
-                            <span id="quoteSubmitSpinner" class="spinner hidden" role="status" aria-hidden="true"></span>
-                        </button>
+                        <button type="submit" class="submit-btn" id="quoteSubmitBtn">{!! __('contact.f.submitQ') !!}</button>
                     </div>
                 </div>
             </form>
@@ -155,7 +129,7 @@ main { min-height: calc(100vh - var(--header-height)); padding-top: var(--header
 <footer>
     <div class="container">
         <div class="footer-top"><a class="brand" href="{{ route('home') }}"><span class="brand-mark"></span>BETA</a></div>
-        <div class="footer-bottom"><span>© 2026 BETA</span><span data-i18n="footer.tagline">Engineer. Manufacture. Install.</span></div>
+        <div class="footer-bottom"><span>© 2026 BETA</span><span>{!! __('app.footer.tagline') !!}</span></div>
     </div>
 </footer>
 
@@ -166,15 +140,6 @@ main { min-height: calc(100vh - var(--header-height)); padding-top: var(--header
         document.getElementById('btn-quote').className = `tab-btn ${type === 'quote' ? 'active' : ''}`;
         document.getElementById('btn-career').className = `tab-btn ${type === 'career' ? 'active' : ''}`;
     }
-
-    const translations = {
-        en: { nav: { home: "Home", about: "About", services: "Services", products: "Products", projects: "Projects", contact: "Contact & Careers" }, tab: { quote: "Request a Quote", career: "Join Our Team (Careers)" }, q: { title: "Project Quotation & Inquiries" }, c: { title: "Career Application", pos: "Target Position *", cv: "Upload CV / Resume (PDF) *", submitC: "Submit Job Application" }, f: { name: "Full Name *", email: "Email Address *", company: "Company Name", phone: "Phone Number *", boq: "Upload Drawing / BOQ (PDF)", details: "Project Scope & Details", submitQ: "Submit Quote Request", captcha: "Security Check *" }, footer: { tagline: "Engineer. Manufacture. Install." } },
-        ar: { nav: { home: "الرئيسية", about: "عن الشركة", services: "الخدمات", products: "المنتجات", projects: "المشاريع", contact: "التواصل والتوظيف" }, tab: { quote: "طلب عرض سعر", career: "الانضمام للفريق (الوظائف)" }, q: { title: "استفسارات وعروض أسعار المشاريع" }, c: { title: "تقديم طلب توظيف", pos: "الوظيفة المستهدفة *", cv: "رفع السيرة الذاتية (PDF) *", submitC: "إرسال طلب التوظيف" }, f: { name: "الاسم الكامل *", email: "البريد الإلكتروني *", company: "اسم الشركة", phone: "رقم الهاتف *", boq: "رفع المخطط / مقايسة الأسعار (PDF)", details: "تفاصيل ونطاق المشروع", submitQ: "إرسال طلب عرض السعر", captcha: "التحقق الأمني *" }, footer: { tagline: "هندسة. تصنيع. تركيب." } }
-    };
-    let currentLang = localStorage.getItem('beta_lang') || 'en';
-    function resolvePath(p, o) { return p.split('.').reduce((a, b) => a && a[b], o); }
-    function updateLang() { document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr'; document.documentElement.lang = currentLang; document.getElementById('lang-en').className = currentLang === 'en' ? 'active-lang' : ''; document.getElementById('lang-ar').className = currentLang === 'ar' ? 'active-lang' : ''; document.querySelectorAll('[data-i18n]').forEach(e => { const t = resolvePath(e.getAttribute('data-i18n'), translations[currentLang]); if(t) e.innerHTML = t; }); }
-    function toggleLanguage() { currentLang = currentLang === 'en' ? 'ar' : 'en'; localStorage.setItem('beta_lang', currentLang); updateLang(); }
 
     // ---- Anti-spam: honeypot + time-trap ----
     document.addEventListener("DOMContentLoaded", function() {
@@ -215,5 +180,6 @@ main { min-height: calc(100vh - var(--header-height)); padding-top: var(--header
         }
     });
 </script>
+<x-success-modal />
 </body>
 </html>

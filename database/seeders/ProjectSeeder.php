@@ -50,7 +50,10 @@ class ProjectSeeder extends Seeder
         ];
 
         foreach ($projects as $project) {
-            \App\Models\Project::create($project);
+            $slug = $project['slug'];
+            unset($project['slug']);
+
+            \App\Models\Project::firstOrCreate(['slug' => $slug], $project);
         }
     }
 }

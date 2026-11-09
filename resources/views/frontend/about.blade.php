@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="{{ app()->getLocale() }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BETA — About, Quality & Downloads</title>
+<title>{{ __('about.seo_title') }}</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
@@ -62,30 +62,14 @@ footer { padding: 80px 0 30px; background: var(--ink); color: var(--white); }
 </style>
 </head>
 <body>
-<header class="nav">
-    <div class="nav-inner">
-        <a class="brand" href="{{ route('home') }}"><span class="brand-mark"></span>BETA</a>
-        <nav class="nav-links">
-            <a href="{{ route('home') }}" @class(['active' => request()->routeIs('home')]) data-i18n="nav.home">Home</a>
-            <a href="{{ route('about') }}" @class(['active' => request()->routeIs('about')]) data-i18n="nav.about">About Us</a>
-            <a href="{{ route('services') }}" @class(['active' => request()->routeIs('services')]) data-i18n="nav.services">Services</a>
-            <a href="{{ route('products') }}" @class(['active' => request()->routeIs('products')]) data-i18n="nav.products">Products</a>
-            <a href="{{ route('projects') }}" @class(['active' => request()->routeIs('projects')]) data-i18n="nav.projects">Projects</a>
-            <a href="{{ route('contact') }}" @class(['active' => request()->routeIs('contact')]) data-i18n="nav.contact">Contact</a>
-        </nav>
-        <div class="nav-right">
-            <button class="lang-switch" onclick="toggleLanguage()"><span id="lang-en" class="active-lang">EN</span> | <span id="lang-ar">عربي</span></button>
-            <a class="quote" href="{{ route('contact') }}" data-i18n="nav.quote">Request a Quote</a>
-        </div>
-    </div>
-</header>
+<x-header />
 
 <main>
     <section class="inner-hero">
         <div class="container gsap-hero">
-            <div class="label" data-i18n="about.heroLabel">01 / Story & Governance</div>
-            <h1 data-i18n="about.heroTitle">Engineered Trust. <br>Proven Excellence.</h1>
-            <p style="color: rgba(255,255,255,0.85); max-width:600px;" data-i18n="about.heroDesc">Discover our history, quality standards, safety certifications, and technical resources all in one place.</p>
+            <div class="label">{!! __('about.about.heroLabel') !!}</div>
+            <h1>{!! __('about.about.heroTitle') !!}</h1>
+            <p style="color: rgba(255,255,255,0.85); max-width:600px;">{!! __('about.about.heroDesc') !!}</p>
         </div>
     </section>
 
@@ -93,10 +77,10 @@ footer { padding: 80px 0 30px; background: var(--ink); color: var(--white); }
     <section class="section-pad">
         <div class="container about-grid">
             <div class="gsap-fade-up">
-                <div class="label" style="color:var(--ocean)" data-i18n="about.stdLabel">The BETA Standard</div>
-                <h2 style="font-size:38px; line-height:1.1; margin-bottom:20px;" data-i18n="about.stdTitle">Precision is not a feature. It is the foundation.</h2>
-                <p style="color:var(--muted); margin-bottom:15px;" data-i18n="about.desc1">Established to redefine industrial manufacturing, BETA specializes in engineering, manufacturing, and installing metal and steel structures.</p>
-                <p style="color:var(--muted);" data-i18n="about.desc2">Our state-of-the-art facilities ensure every project meets rigorous Egyptian and Saudi structural standards.</p>
+                <div class="label" style="color:var(--ocean)">{!! __('about.about.stdLabel') !!}</div>
+                <h2 style="font-size:38px; line-height:1.1; margin-bottom:20px;">{!! __('about.about.stdTitle') !!}</h2>
+                <p style="color:var(--muted); margin-bottom:15px;">{!! __('about.about.desc1') !!}</p>
+                <p style="color:var(--muted);">{!! __('about.about.desc2') !!}</p>
             </div>
             <div class="about-image gsap-fade-up">
                 <img src="https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?auto=format&fit=crop&w=1000&q=80" alt="Factory Interior">
@@ -107,20 +91,20 @@ footer { padding: 80px 0 30px; background: var(--ink); color: var(--white); }
     <!-- SECTION 2: QUALITY & STANDARDS -->
     <section class="section-pad" style="background:var(--white);">
         <div class="container">
-            <div class="label" style="color:var(--ocean)" data-i18n="q.label">02 / Quality & Compliance</div>
-            <h2 style="font-size:36px;" data-i18n="q.title">Uncompromising Quality Controls</h2>
+            <div class="label" style="color:var(--ocean)">{!! __('about.q.label') !!}</div>
+            <h2 style="font-size:36px;">{!! __('about.q.title') !!}</h2>
             <div class="q-grid">
                 <div class="q-card gsap-fade-up">
-                    <h3 data-i18n="q.c1.t">Material Traceability</h3>
-                    <p style="font-size:14px; color:var(--muted);" data-i18n="q.c1.d">Complete mill test certificate tracking for raw steel procurement.</p>
+                    <h3>{!! __('about.q.c1.t') !!}</h3>
+                    <p style="font-size:14px; color:var(--muted);">{!! __('about.q.c1.d') !!}</p>
                 </div>
                 <div class="q-card gsap-fade-up">
-                    <h3 data-i18n="q.c2.t">Certified Welding</h3>
-                    <p style="font-size:14px; color:var(--muted);" data-i18n="q.c2.d">Operating under AWS and international structural welding codes.</p>
+                    <h3>{!! __('about.q.c2.t') !!}</h3>
+                    <p style="font-size:14px; color:var(--muted);">{!! __('about.q.c2.d') !!}</p>
                 </div>
                 <div class="q-card gsap-fade-up">
-                    <h3 data-i18n="q.c3.t">NDT & Inspection</h3>
-                    <p style="font-size:14px; color:var(--muted);" data-i18n="q.c3.d">In-house non-destructive ultrasonic and magnetic particle testing.</p>
+                    <h3>{!! __('about.q.c3.t') !!}</h3>
+                    <p style="font-size:14px; color:var(--muted);">{!! __('about.q.c3.d') !!}</p>
                 </div>
             </div>
         </div>
@@ -129,20 +113,20 @@ footer { padding: 80px 0 30px; background: var(--ink); color: var(--white); }
     <!-- SECTION 3: DOWNLOADS -->
     <section class="section-pad">
         <div class="container">
-            <div class="label" style="color:var(--ocean)" data-i18n="dl.label">03 / Resource Center</div>
-            <h2 style="font-size:36px;" data-i18n="dl.title">Technical Downloads</h2>
+            <div class="label" style="color:var(--ocean)">{!! __('about.dl.label') !!}</div>
+            <h2 style="font-size:36px;">{!! __('about.dl.title') !!}</h2>
             <div class="dl-grid">
                 <div class="dl-card gsap-fade-up">
-                    <h3 data-i18n="dl.d1">Company Profile PDF</h3>
-                    <a href="#" class="btn-dl" data-i18n="dl.btn">Download</a>
+                    <h3>{!! __('about.dl.d1') !!}</h3>
+                    <a href="#" class="btn-dl">{!! __('about.dl.btn') !!}</a>
                 </div>
                 <div class="dl-card gsap-fade-up">
-                    <h3 data-i18n="dl.d2">ISO & Welding Certificates</h3>
-                    <a href="#" class="btn-dl" data-i18n="dl.btn">Download</a>
+                    <h3>{!! __('about.dl.d2') !!}</h3>
+                    <a href="#" class="btn-dl">{!! __('about.dl.btn') !!}</a>
                 </div>
                 <div class="dl-card gsap-fade-up">
-                    <h3 data-i18n="dl.d3">Product Catalog 2026</h3>
-                    <a href="#" class="btn-dl" data-i18n="dl.btn">Download</a>
+                    <h3>{!! __('about.dl.d3') !!}</h3>
+                    <a href="#" class="btn-dl">{!! __('about.dl.btn') !!}</a>
                 </div>
             </div>
         </div>
@@ -151,19 +135,19 @@ footer { padding: 80px 0 30px; background: var(--ink); color: var(--white); }
         <div class="container stats-grid">
             <div class="stat-item">
                 <h4>16</h4>
-                <p data-i18n="stats.exp">Years of Experience</p>
+                <p>{!! __('about.stats.exp') !!}</p>
             </div>
             <div class="stat-item">
                 <h4>850+</h4>
-                <p data-i18n="stats.projects">Projects Completed</p>
+                <p>{!! __('about.stats.projects') !!}</p>
             </div>
             <div class="stat-item">
                 <h4>50k</h4>
-                <p data-i18n="stats.tons">Tons Fabricated</p>
+                <p>{!! __('about.stats.tons') !!}</p>
             </div>
             <div class="stat-item">
                 <h4>12</h4>
-                <p data-i18n="stats.industries">Industries Served</p>
+                <p>{!! __('about.stats.industries') !!}</p>
             </div>
         </div>
     </section>
@@ -172,20 +156,13 @@ footer { padding: 80px 0 30px; background: var(--ink); color: var(--white); }
 <footer>
     <div class="container">
         <div class="footer-top"><a class="brand" href="{{ route('home') }}"><span class="brand-mark"></span>BETA</a></div>
-        <div class="footer-bottom"><span>© 2026 BETA</span><span data-i18n="footer.tagline">Engineer. Manufacture. Install.</span></div>
+        <div class="footer-bottom"><span>© 2026 BETA</span><span>{!! __('app.footer.tagline') !!}</span></div>
     </div>
 </footer>
 
 <script>
-    const translations = {
-        en: { nav: { home: "Home", about: "About Us", services: "Services", products: "Products", projects: "Projects", contact: "Contact", quote: "Request Quote" }, about: { heroLabel: "01 / Story & Governance", heroTitle: "Engineered Trust. <br>Proven Excellence.", heroDesc: "Discover our history, quality standards, safety certifications, and technical resources all in one place.", stdLabel: "The BETA Standard", stdTitle: "Precision is not a feature. It is the foundation.", desc1: "Established to redefine industrial manufacturing, BETA specializes in engineering, manufacturing, and installing metal and steel structures.", desc2: "Our state-of-the-art facilities ensure every project meets rigorous Egyptian and Saudi structural standards." }, q: { label: "02 / Quality & Compliance", title: "Uncompromising Quality Controls", c1: { t: "Material Traceability", d: "Complete mill test certificate tracking for raw steel procurement." }, c2: { t: "Certified Welding", d: "Operating under AWS and international structural welding codes." }, c3: { t: "NDT & Inspection", d: "In-house non-destructive ultrasonic and magnetic particle testing." } }, dl: { label: "03 / Resource Center", title: "Technical Downloads", d1: "Company Profile PDF", d2: "ISO & Welding Certificates", d3: "Product Catalog 2026", btn: "Download" }, footer: { tagline: "Engineer. Manufacture. Install." } },
-        ar: { nav: { home: "الرئيسية", about: "عن الشركة", services: "الخدمات", products: "المنتجات", projects: "المشاريع", contact: "اتصل بنا", quote: "طلب عرض سعر" }, about: { heroLabel: "01 / القصة والحوكمة", heroTitle: "ثقة هندسية. <br>تميز مثبت.", heroDesc: "اكتشف تاريخنا، معايير الجودة، شهادات السلامة، والموارد التقنية في مكان واحد.", stdLabel: "معيار بيتا", stdTitle: "الدقة ليست ميزة. إنها الأساس.", desc1: "تأسست بيتا برؤية لإعادة تعريف التصنيع الصناعي، وتتخصص في هندسة وتصنيع وتركيب الهياكل المعدنية والفولاذية.", desc2: "تضمن مرافقنا الحديثة تلبية كل مشروع للمواصفات الهيكلية الصارمة في مصر والسعودية." }, q: { label: "02 / الجودة والامتثال", title: "ضوابط جودة لا تقبل المساومة", c1: { t: "تتبع المواد", d: "تتبع كامل لشهادات اختبار المصنع لجميع مشتريات الصلب الخام." }, c2: { t: "لحام معتمد", d: "العمل وفقًا لقواعد اللحام الهيكلي الدولية وشهادات AWS." }, c3: { t: "الاختبارات غير المدمرة", d: "فحوصات الموجات فوق الصوتية والجسيمات المغناطيسية داخل المصنع." } }, dl: { label: "03 / مركز الموارد", title: "التحميلات التقنية", d1: "الملف التعريفي للشركة (PDF)", d2: "شهادات ISO واللحام", d3: "كتالوج المنتجات 2026", btn: "تحميل" }, footer: { tagline: "هندسة. تصنيع. تركيب." } }
-    };
-    let currentLang = localStorage.getItem('beta_lang') || 'en'; gsap.registerPlugin(ScrollTrigger);
-    function resolvePath(p, o) { return p.split('.').reduce((a, b) => a && a[b], o); }
-    function updateLang() { document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr'; document.documentElement.lang = currentLang; document.getElementById('lang-en').className = currentLang === 'en' ? 'active-lang' : ''; document.getElementById('lang-ar').className = currentLang === 'ar' ? 'active-lang' : ''; document.querySelectorAll('[data-i18n]').forEach(e => { const t = resolvePath(e.getAttribute('data-i18n'), translations[currentLang]); if(t) e.innerHTML = t; }); setTimeout(() => ScrollTrigger.refresh(), 150); }
-    function toggleLanguage() { currentLang = currentLang === 'en' ? 'ar' : 'en'; localStorage.setItem('beta_lang', currentLang); updateLang(); }
-    document.addEventListener("DOMContentLoaded", () => { updateLang(); gsap.fromTo('.gsap-hero > *', { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, stagger: 0.1 }); gsap.fromTo('.gsap-fade-up', { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, scrollTrigger: { trigger: '.gsap-fade-up', start: 'top 85%' } }); });
+    document.addEventListener("DOMContentLoaded", () => { gsap.fromTo('.gsap-hero > *', { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, stagger: 0.1 }); gsap.fromTo('.gsap-fade-up', { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, scrollTrigger: { trigger: '.gsap-fade-up', start: 'top 85%' } }); });
 </script>
+<x-success-modal />
 </body>
 </html>

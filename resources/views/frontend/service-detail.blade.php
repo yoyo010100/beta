@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="{{ app()->getLocale() }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -58,22 +58,7 @@
 </head>
 <body>
 
-<header class="nav">
-    <div class="nav-inner">
-        <a class="brand" href="{{ route('home') }}"><span class="brand-mark"></span>BETA</a>
-        <nav class="nav-links">
-            <a href="{{ route('home') }}" @class(['active' => request()->routeIs('home')]) data-i18n="nav.home">Home</a>
-            <a href="{{ route('services') }}" @class(['active' => request()->routeIs('services')]) data-i18n="nav.services">Services</a>
-            <a href="{{ route('products') }}" @class(['active' => request()->routeIs('products')]) data-i18n="nav.products">Products</a>
-            <a href="{{ route('projects') }}" @class(['active' => request()->routeIs('projects')]) data-i18n="nav.projects">Projects & Sectors</a>
-            <a href="{{ route('contact') }}" @class(['active' => request()->routeIs('contact')]) data-i18n="nav.contact">Contact</a>
-        </nav>
-        <div class="nav-right">
-            <button class="lang-switch" onclick="toggleLanguage()"><span id="lang-en" class="active-lang">EN</span> | <span id="lang-ar">عربي</span></button>
-            <a class="quote" href="{{ route('contact') }}" data-i18n="nav.quote">Request Quote</a>
-        </div>
-    </div>
-</header>
+<x-header />
 
 <main>
     <section class="service-hero">
@@ -105,22 +90,10 @@
 <footer>
     <div class="container">
         <div class="footer-top"><a class="brand" href="{{ route('home') }}"><span class="brand-mark"></span>BETA</a></div>
-        <div class="footer-bottom"><span>© 2026 BETA</span><span data-i18n="footer.tagline">Engineer. Manufacture. Install.</span></div>
+        <div class="footer-bottom"><span>© 2026 BETA</span><span>{!! __('app.footer.tagline') !!}</span></div>
     </div>
 </footer>
 
-<script>
-    const translations = {
-        en: { nav: { home: "Home", about: "About", services: "Services & Solutions", products: "Products", projects: "Projects & Sectors", contact: "Contact", quote: "Request Quote" }, footer: { tagline: "Engineer. Manufacture. Install." } },
-        ar: { nav: { home: "الرئيسية", about: "عن الشركة", services: "الخدمات والحلول", products: "المنتجات", projects: "المشاريع والقطاعات", contact: "اتصل بنا", quote: "طلب عرض سعر" }, footer: { tagline: "هندسة. تصنيع. تركيب." } }
-    };
-    let currentLang = localStorage.getItem('beta_lang') || 'en';
-    document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
-    document.documentElement.lang = currentLang;
-    document.getElementById('lang-en').className = currentLang === 'en' ? 'active-lang' : '';
-    document.getElementById('lang-ar').className = currentLang === 'ar' ? 'active-lang' : '';
-    document.querySelectorAll('[data-i18n]').forEach(e => { const t = translations[currentLang][e.getAttribute('data-i18n')]; if(t) e.innerHTML = t; });
-    function toggleLanguage() { currentLang = currentLang === 'en' ? 'ar' : 'en'; localStorage.setItem('beta_lang', currentLang); document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr'; document.documentElement.lang = currentLang; document.getElementById('lang-en').className = currentLang === 'en' ? 'active-lang' : ''; document.getElementById('lang-ar').className = currentLang === 'ar' ? 'active-lang' : ''; }
-</script>
+<x-success-modal />
 </body>
 </html>

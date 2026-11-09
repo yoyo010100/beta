@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BETA — Featured Projects & Sectors</title>
+<title>{{ __('projects.seo_title') }}</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
@@ -80,31 +80,13 @@ footer { padding: 80px 0 30px; background: var(--ink); color: var(--white); }
 </head>
 <body>
 
-<header class="nav">
-    <div class="nav-inner">
-        <a class="brand" href="{{ route('home') }}"><span class="brand-mark"></span>BETA</a>
-        <nav class="nav-links">
-            <a href="{{ route('home') }}" @class(['active' => request()->routeIs('home')]) data-i18n="nav.home">Home</a>
-            <a href="{{ route('about') }}" @class(['active' => request()->routeIs('about')]) data-i18n="nav.about">About</a>
-            <a href="{{ route('services') }}" @class(['active' => request()->routeIs('services')]) data-i18n="nav.services">Services</a>
-            <a href="{{ route('products') }}" @class(['active' => request()->routeIs('products')]) data-i18n="nav.products">Products</a>
-            <a href="{{ route('projects') }}" @class(['active' => request()->routeIs('projects')]) data-i18n="nav.projects">Projects & Sectors</a>
-            <a href="{{ route('announcements') }}" @class(['active' => request()->routeIs('announcements*')]) data-i18n="nav.news">Announcements</a>
-            <a href="{{ route('careers') }}" @class(['active' => request()->routeIs('careers*')]) data-i18n="nav.careers">Careers</a>
-            <a href="{{ route('contact') }}" @class(['active' => request()->routeIs('contact')]) data-i18n="nav.contact">Contact</a>
-        </nav>
-        <div class="nav-right">
-            <a href="{{ route('locale.switch', app()->getLocale() === 'ar' ? 'en' : 'ar') }}" class="lang-switch" style="text-decoration:none;"><span class="active-lang">{{ app()->getLocale() === 'ar' ? 'EN' : 'عربي' }}</span></a>
-            <a class="quote" href="{{ route('contact') }}" data-i18n="nav.quote">Request Quote</a>
-        </div>
-    </div>
-</header>
+<x-header />
 
 <main>
     <section class="inner-hero">
         <div class="container gsap-hero">
-            <div class="label" data-i18n="p.label">Proven Footprint</div>
-            <h1 data-i18n="p.title">Engineered Heavy <br>Structures.</h1>
+            <div class="label">{!! __('projects.p.label') !!}</div>
+            <h1>{!! __('projects.p.title') !!}</h1>
         </div>
     </section>
 
@@ -112,10 +94,10 @@ footer { padding: 80px 0 30px; background: var(--ink); color: var(--white); }
     <section class="section-pad">
         <div class="container">
             <div class="filter-bar gsap-fade-up">
-                <button class="filter-btn active" onclick="filterProjects('all')" data-i18n="p.fAll">All Sectors</button>
-                <button class="filter-btn" onclick="filterProjects('industrial')" data-i18n="p.fInd">Industrial & Logistics</button>
-                <button class="filter-btn" onclick="filterProjects('commercial')" data-i18n="p.fCom">Commercial</button>
-                <button class="filter-btn" onclick="filterProjects('infra')" data-i18n="p.fInf">Infrastructure</button>
+                <button class="filter-btn active" onclick="filterProjects('all')">{!! __('projects.p.fAll') !!}</button>
+                <button class="filter-btn" onclick="filterProjects('industrial')">{!! __('projects.p.fInd') !!}</button>
+                <button class="filter-btn" onclick="filterProjects('commercial')">{!! __('projects.p.fCom') !!}</button>
+                <button class="filter-btn" onclick="filterProjects('infra')">{!! __('projects.p.fInf') !!}</button>
             </div>
 
             <div class="projects-grid">
@@ -128,7 +110,7 @@ footer { padding: 80px 0 30px; background: var(--ink); color: var(--white); }
                         <div class="project-content">
                             <h3>{{ $project->getTranslated('title') }}</h3>
                             <p>{{ $project->getTranslated('description') }}</p>
-                            <button class="project-link" onclick="openModal('{{ $project->public_id }}')" data-i18n="p.readCase">View Case Study →</button>
+                            <button class="project-link" onclick="openModal('{{ $project->public_id }}')">{!! __('projects.p.readCase') !!}</button>
                         </div>
                     </div>
                 @endforeach
@@ -139,13 +121,13 @@ footer { padding: 80px 0 30px; background: var(--ink); color: var(--white); }
     <!-- SECTION 2: SECTORS SERVED (Merged from industries.html) -->
     <section class="section-pad sectors-sec">
         <div class="container">
-            <div class="label" style="color:var(--sun)" data-i18n="sec.label">Cross-Industry Expertise</div>
-            <h2 style="font-size:38px; line-height:1.1;" data-i18n="sec.title">Sectors We Empower Across Egypt & KSA</div>
+            <div class="label" style="color:var(--sun)">{!! __('projects.sec.label') !!}</div>
+            <h2 style="font-size:38px; line-height:1.1;">{!! __('projects.sec.title') !!}</h2>
             <div class="sectors-grid">
-                <div class="sector-card gsap-fade-up"><h4 data-i18n="sec.s1">Industrial & Manufacturing</h4><p data-i18n="sec.s1d">Factories, assembly lines, overhead crane gantries[cite: 2].</p></div>
-                <div class="sector-card gsap-fade-up"><h4 data-i18n="sec.s2">Logistics & Warehousing</h4><p data-i18n="sec.s2d">Wide-span clear buildings, high-bay distribution hubs[cite: 2].</p></div>
-                <div classsector-card gsap-fade-up"><h4 data-i18n="sec.s3">Energy & Petrochemicals</h4><p data-i18n="sec.s3d">Heavy pipe racks, platform structures, protective coatings[cite: 2].</p></div>
-                <div class="sector-card gsap-fade-up"><h4 data-i18n="sec.s4">Commercial & Real Estate</h4><p data-i18n="sec.s4d">Multi-story framing, high-end canopies, decorative facades[cite: 2].</p></div>
+                <div class="sector-card gsap-fade-up"><h4>{!! __('projects.sec.s1') !!}</h4><p>{!! __('projects.sec.s1d') !!}</p></div>
+                <div class="sector-card gsap-fade-up"><h4>{!! __('projects.sec.s2') !!}</h4><p>{!! __('projects.sec.s2d') !!}</p></div>
+                <div class="sector-card gsap-fade-up"><h4>{!! __('projects.sec.s3') !!}</h4><p>{!! __('projects.sec.s3d') !!}</p></div>
+                <div class="sector-card gsap-fade-up"><h4>{!! __('projects.sec.s4') !!}</h4><p>{!! __('projects.sec.s4d') !!}</p></div>
             </div>
         </div>
     </section>
@@ -162,7 +144,7 @@ footer { padding: 80px 0 30px; background: var(--ink); color: var(--white); }
 <footer>
     <div class="container">
         <div class="footer-top"><a class="brand" href="{{ route('home') }}"><span class="brand-mark"></span>BETA</a></div>
-        <div class="footer-bottom"><span>© 2026 BETA</span><span data-i18n="footer.tagline">Engineer. Manufacture. Install.</span></div>
+        <div class="footer-bottom"><span>© 2026 BETA</span><span>{!! __('app.footer.tagline') !!}</span></div>
     </div>
 </footer>
 
@@ -201,17 +183,10 @@ footer { padding: 80px 0 30px; background: var(--ink); color: var(--white); }
 
     function closeModal() { document.getElementById('caseModal').classList.remove('active'); }
 
-    const translations = {
-        en: { nav: { home: "Home", about: "About", services: "Services", products: "Products", projects: "Projects & Sectors", contact: "Contact", quote: "Request Quote" }, p: { label: "Proven Footprint", title: "Engineered Heavy <br>Structures.", fAll: "All Sectors", fInd: "Industrial & Logistics", fCom: "Commercial", fInf: "Infrastructure", readCase: "View Case Study →", p1: { t: "Al-Zamil Logistics Hub", d: "10,000 sqm heavy steel warehouse facility engineered with high wind-load tolerance in Jeddah, KSA[cite: 2]." }, p2: { t: "Cairo Executive Tower", d: "Complex internal structural mezzanine and architectural steel framing for multi-story headquarters[cite: 2]." }, p3: { t: "Highway Flyover Beams", d: "Heavy plate girder fabrication and galvanizing for critical transport infrastructure[cite: 2]." } }, sec: { label: "Cross-Industry Expertise", title: "Sectors We Empower Across Egypt & KSA", s1: "Industrial & Manufacturing", s1d: "Factories, assembly lines, overhead crane gantries[cite: 2].", s2: "Logistics & Warehousing", s2d: "Wide-span clear buildings, high-bay distribution hubs[cite: 2].", s3: "Energy & Petrochemicals", s3d: "Heavy pipe racks, platform structures, protective coatings[cite: 2].", s4: "Commercial & Real Estate", s4d: "Multi-story framing, high-end canopies, decorative facades[cite: 2]." }, footer: { tagline: "Engineer. Manufacture. Install." } },
-        ar: { nav: { home: "الرئيسية", about: "عن الشركة", services: "الخدمات", products: "المنتجات", projects: "المشاريع والقطاعات", contact: "اتصل بنا", quote: "طلب عرض سعيد" }, p: { label: "سجل حافل", title: "هياكل ثقيلة <br>مهندسة بدقة.", fAll: "جميع القطاعات", fInd: "الصناعي واللوجستي", fCom: "التجاري", fInf: "البنية التحتية", readCase: "عرض دراسة الحالة ←", p1: { t: "مركز لوجستيات الزامل", d: "مستودع صلب ثقيل بمساحة 10,000 متر مربع مصمم لتحمل الرياح العالية في جدة[cite: 2]." }, p2: { t: "برج القاهرة التنفيذي", d: "ميزانين إنشائي داخلي معقد وإطار صلب معماري للمقر الرئيسي[cite: 2]." }, p3: { t: "كمرات الكباري والطرُق", d: "تصنيع وتصفيح الكمرات اللوحية الثقيلة للبنية التحتية الحيوية للنقل[cite: 2]." } }, sec: { label: "خبرة متقاطعة", title: "القطاعات التي ندعمها في مصر والسعودية", s1: "الصناعة والتصنيع", s1d: "المصانع، خطوط التجميع، وهياكل الرافعة الجسرية[cite: 2].", s2: "اللوجستيات والمستودعات", s2d: "مباني واسعة الامتداد، ومراكز توزيع مرتفعة[cite: 2].", s3: "الطاقة والبتروكيماويات", s3d: "حوامل الأنابيب الثقيلة، المنصات، وطلاءات الحماية[cite: 2].", s4: "التجاري والعقارات", s4d: "إطارات متعددة الطوابق، مظلات فاخرة، وواجهات ديكورية[cite: 2]." }, footer: { tagline: "هندسة. تصنيع. تركيب." } }
-    };
 
-    let currentLang = localStorage.getItem('beta_lang') || 'en';
     gsap.registerPlugin(ScrollTrigger);
-    function resolvePath(p, o) { return p.split('.').reduce((a, b) => a && a[b], o); }
-    function updateLang() { document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr'; document.documentElement.lang = currentLang; document.getElementById('lang-en').className = currentLang === 'en' ? 'active-lang' : ''; document.getElementById('lang-ar').className = currentLang === 'ar' ? 'active-lang' : ''; document.querySelectorAll('[data-i18n]').forEach(e => { const t = resolvePath(e.getAttribute('data-i18n'), translations[currentLang]); if(t) e.innerHTML = t; }); setTimeout(() => ScrollTrigger.refresh(), 150); }
-    function toggleLanguage() { currentLang = currentLang === 'en' ? 'ar' : 'en'; localStorage.setItem('beta_lang', currentLang); updateLang(); }
-    document.addEventListener("DOMContentLoaded", () => { updateLang(); gsap.fromTo('.gsap-hero > *', { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, stagger: 0.1 }); gsap.fromTo('.gsap-fade-up', { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, scrollTrigger: { trigger: '.gsap-fade-up', start: 'top 85%' } }); });
+    document.addEventListener("DOMContentLoaded", () => { gsap.fromTo('.gsap-hero > *', { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, stagger: 0.1 }); gsap.fromTo('.gsap-fade-up', { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, scrollTrigger: { trigger: '.gsap-fade-up', start: 'top 85%' } }); });
 </script>
+<x-success-modal />
 </body>
 </html>

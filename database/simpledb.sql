@@ -113,6 +113,7 @@ CREATE TABLE `quote_requests` (
     `submitted_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `created_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `deleted_at` TIMESTAMP NULL,
     CONSTRAINT `fk_quote_requests_country` FOREIGN KEY (`country_id`) REFERENCES `countries` (`id`) ON DELETE SET NULL,
     CONSTRAINT `fk_quote_requests_service` FOREIGN KEY (`service_id`) REFERENCES `services` (`id`) ON DELETE SET NULL,
     CONSTRAINT `fk_quote_requests_product` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE SET NULL

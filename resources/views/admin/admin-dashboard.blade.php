@@ -73,27 +73,27 @@ tr:hover { background: #f9fafb; }
     <nav class="nav-menu">
         <span class="nav-label">Core Modules</span>
         <a href="{{ route('admin.dashboard') }}" @class(['nav-item', 'active' => request()->routeIs('admin.dashboard')])>
-            <span class="icon">📊</span> {{ __('admin.dashboard') }}
+            <span class="icon">📊</span> {{ __('app.admin.dashboard') }}
         </a>
         <a href="{{ route('admin.leads.index') }}" @class(['nav-item', 'active' => request()->routeIs('admin.leads*')])>
-            <span class="icon">📩</span> {{ __('admin.leads') }}
+            <span class="icon">📩</span> {{ __('app.admin.leads') }}
         </a>
         <a href="{{ route('admin.catalog.products') }}" @class(['nav-item', 'active' => request()->routeIs('admin.catalog.products*')])>
-            <span class="icon">📦</span> {{ __('admin.catalog.products') }}
+            <span class="icon">📦</span> {{ __('app.admin.catalog.products') }}
         </a>
         <a href="{{ route('admin.catalog.services') }}" @class(['nav-item', 'active' => request()->routeIs('admin.catalog.services*')])>
-            <span class="icon">⚙️</span> {{ __('admin.catalog.services') }}
+            <span class="icon">⚙️</span> {{ __('app.admin.catalog.services') }}
         </a>
 
         <span class="nav-label" style="margin-top: 30px;">Content & HR</span>
         <a href="{{ route('admin.announcements.index') }}" @class(['nav-item', 'active' => request()->routeIs('admin.announcements*')])>
-            <span class="icon">📢</span> {{ __('admin.announcements') }}
+            <span class="icon">📢</span> {{ __('app.admin.announcements') }}
         </a>
         <a href="{{ route('admin.careers.index') }}" @class(['nav-item', 'active' => request()->routeIs('admin.careers.index') || request()->routeIs('admin.careers.show')])>
-            <span class="icon">👥</span> {{ __('admin.careers') }}
+            <span class="icon">👥</span> {{ __('app.admin.careers') }}
         </a>
         <a href="{{ route('admin.careers.postings') }}" @class(['nav-item', 'active' => request()->routeIs('admin.careers.postings*')])>
-            <span class="icon">💼</span> {{ __('admin.careers.postings') }}
+            <span class="icon">💼</span> {{ __('app.admin.careers.postings') }}
         </a>
     </nav>
 </aside>
@@ -105,26 +105,27 @@ tr:hover { background: #f9fafb; }
         gsap.fromTo('.gsap-ui', { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, stagger: 0.1 });
     });
 </script>
+<x-success-modal />
 </body>
 </html>
 <!-- Include Master Sidebar/Header Here -->
 <main class="main-content">
-    <header class="topbar"><div class="page-title">{{ __('admin.dashboard') }}</div><div class="user-profile"><span>Admin Manager</span><div class="avatar">AM</div></div></header>
+    <header class="topbar"><div class="page-title">{{ __('app.admin.dashboard') }}</div><div class="user-profile"><span>Admin Manager</span><div class="avatar">AM</div></div></header>
     
     <div class="wrapper">
         <div class="flex-between gsap-ui">
             <div>
-                <h2 style="font-size:24px; color:var(--ink);">{{ __('admin.welcome_back') }}</h2>
-                <p style="color:var(--muted); font-size:14px;">{{ __('admin.q3_performance_summary') }}</p>
+                <h2 style="font-size:24px; color:var(--ink);">{{ __('app.admin.welcome_back') }}</h2>
+                <p style="color:var(--muted); font-size:14px;">{{ __('app.admin.q3_performance_summary') }}</p>
             </div>
-            <button class="btn btn-outline">📅 {{ __('admin.generate_q3_report') }}</button>
+            <button class="btn btn-outline">📅 {{ __('app.admin.generate_q3_report') }}</button>
         </div>
 
         <div class="metric-grid gsap-ui">
-            <div class="metric-card"><h4>{{ __('admin.metrics.total_pipeline_value') }}</h4><div class="value">$14.2M</div><span style="color:#38a169; font-size:12px; font-weight:700;">+ $2.1M this month</span></div>
-            <div class="metric-card"><h4>{{ __('admin.metrics.active_rfqs') }}</h4><div class="value">48</div><span style="color:#e53e3e; font-size:12px; font-weight:700;">12 require attention</span></div>
-            <div class="metric-card"><h4>{{ __('admin.metrics.current_projects') }}</h4><div class="value">22</div><span style="color:#38a169; font-size:12px; font-weight:700;">On Schedule: 20</span></div>
-            <div class="metric-card"><h4>{{ __('admin.metrics.hiring_pipeline') }}</h4><div class="value">84</div><span style="color:#38a169; font-size:12px; font-weight:700;">New applicants: 15</span></div>
+            <div class="metric-card"><h4>{{ __('app.admin.metrics.total_pipeline_value') }}</h4><div class="value">$14.2M</div><span style="color:#38a169; font-size:12px; font-weight:700;">+ $2.1M this month</span></div>
+            <div class="metric-card"><h4>{{ __('app.admin.metrics.active_rfqs') }}</h4><div class="value">48</div><span style="color:#e53e3e; font-size:12px; font-weight:700;">12 require attention</span></div>
+            <div class="metric-card"><h4>{{ __('app.admin.metrics.current_projects') }}</h4><div class="value">22</div><span style="color:#38a169; font-size:12px; font-weight:700;">On Schedule: 20</span></div>
+            <div class="metric-card"><h4>{{ __('app.admin.metrics.hiring_pipeline') }}</h4><div class="value">84</div><span style="color:#38a169; font-size:12px; font-weight:700;">New applicants: 15</span></div>
         </div>
 
         <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px; margin-bottom: 30px;">

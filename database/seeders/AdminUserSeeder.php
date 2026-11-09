@@ -15,11 +15,11 @@ class AdminUserSeeder extends Seeder
     public function run(): void
     {
         User::firstOrCreate(
-            ['email' => 'admin@beta-industrial.com'],
+            ['email' => 'admin@beta.com'],
             [
                 'public_id' => (string) Str::ulid(),
                 'name' => 'Super Admin',
-                'password' => Hash::make('Admin@Beta2026!'),
+                'password' => Hash::make('password'),
                 'role' => 'super_admin',
                 'is_active' => true,
             ]

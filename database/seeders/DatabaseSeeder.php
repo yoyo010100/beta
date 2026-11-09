@@ -24,7 +24,7 @@ class DatabaseSeeder extends Seeder
     {
         // 1. Admin Users
         $this->call(AdminUserSeeder::class);
-        $admin = User::where('email', 'admin@beta-industrial.com')->first();
+        $admin = User::where('email', 'admin@beta.com')->first();
 
         // 2. Currencies & Countries
         $egp = Currency::firstOrCreate(['code' => 'EGP'], ['symbol' => 'EGP', 'is_active' => true]);
@@ -409,7 +409,10 @@ class DatabaseSeeder extends Seeder
             }
         }
 
-        // 8. Seed Sample Job Applications
+        // 8. Projects
+        $this->call(ProjectSeeder::class);
+
+        // 9. Seed Sample Job Applications
         $firstJob = JobPosting::first();
         if ($firstJob) {
             JobApplication::create([

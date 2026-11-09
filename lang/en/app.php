@@ -4,12 +4,17 @@ return [
     // NAV
     'nav' => [
         'home' => 'Home',
+        'about' => 'About',
         'services' => 'Services',
         'products' => 'Products',
+        'projects' => 'Projects',
         'news' => 'News',
+        'announcements' => 'Announcements',
         'careers' => 'Careers',
         'contact' => 'Contact',
         'request_quote' => 'Request a Quote',
+        'main' => 'Main navigation',
+        'menu' => 'Menu',
     ],
 
     // FOOTER
@@ -86,11 +91,18 @@ return [
     // ADMIN
     'admin' => [
         'dashboard' => 'Executive Dashboard',
+        'leads' => 'Quotation Leads',
+        'announcements' => 'Announcements',
+        'careers' => ['postings' => 'Job Postings'],
         'metrics' => [
             'total_pipeline_value' => 'Total Pipeline Value',
             'active_rfqs' => 'Active RFQs',
             'current_projects' => 'Current Active Projects',
             'hiring_pipeline' => 'Hiring Pipeline',
+            'new_rfqs' => 'New RFQs',
+            'engineering_review' => 'Engineering Review',
+            'quotations_submitted' => 'Quotations Submitted',
+            'total_won_mtd' => 'Total Won (MTD)',
         ],
         'welcome_back' => 'Welcome back',
         'q3_performance_summary' => 'Here is your Q3 enterprise performance summary',
@@ -108,6 +120,8 @@ return [
         ],
         'catalog' => [
             'add_product' => 'Add Product',
+            'products' => 'Products',
+            'services' => 'Services',
         ],
         'badge' => [
             'new_review' => 'New Review',
