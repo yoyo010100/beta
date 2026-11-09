@@ -196,14 +196,11 @@ html[dir="rtl"] .badge { transform: scaleX(-1); transform-origin: left; }
                 <div style="font-size:11px;color:var(--muted)">{{ Str::upper(Auth::user()->role) }}</div>
             </div>
             <div class="avatar">{{ strtoupper(substr(Auth::user()->name, 0, 2)) }}</div>
-            @endauth>
+            @endauth
         </div>
     </header>
 
     <div class="wrapper">
-        @if(session('success'))
-            <div class="flash-success">✓ {{ session('success') }}</div>
-        @endif
         @if(session('error'))
             <div class="flash-error">⚠ {{ session('error') }}</div>
         @endif
@@ -217,6 +214,7 @@ html[dir="rtl"] .badge { transform: scaleX(-1); transform-origin: left; }
     </div>
 </main>
 
+<x-success-modal />
 <script>
 document.addEventListener("DOMContentLoaded", () => {
     gsap.fromTo('.metric-card, .chart-card, .table-wrap, .form-card',

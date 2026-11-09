@@ -84,7 +84,7 @@ footer{padding:80px 0 30px;background:var(--ink);color:var(--white)}
             <a href="{{ route('home') }}" @class(['active' => request()->routeIs('home')])>{{ __('nav.home') }}</a>
             <a href="{{ route('services') }}" @class(['active' => request()->routeIs('services')])>{{ __('nav.services') }}</a>
             <a href="{{ route('products') }}" @class(['active' => request()->routeIs('products')])>{{ __('nav.products') }}</a>
-            <a href="{{ route('announcements') }}" @class(['active' => request()->routeIs('announcements*')])>{{ __('nav.news') }}</a>
+            <a href="{{ route('announcements.index') }}" @class(['active' => request()->routeIs('announcements*')])>{{ __('nav.news') }}</a>
             <a href="{{ route('careers') }}" @class(['active' => request()->routeIs('careers')])>{{ __('nav.careers') }}</a>
             <a href="{{ route('contact') }}" @class(['active' => request()->routeIs('contact')])>{{ __('nav.contact') }}</a>
         </nav>
@@ -98,11 +98,6 @@ footer{padding:80px 0 30px;background:var(--ink);color:var(--white)}
 </header>
 
 <main>
-    @if(session('success'))
-        <div class="container" style="padding-top:20px">
-            <div class="flash-success">✓ {{ session('success') }}</div>
-        </div>
-    @endif
     @if($errors->any())
         <div class="container" style="padding-top:20px">
             <div class="flash-error">{{ $errors->first() }}</div>
@@ -127,7 +122,7 @@ footer{padding:80px 0 30px;background:var(--ink);color:var(--white)}
             </div>
             <div class="footer-col">
                 <h4>{{ __('footer.company') }}</h4>
-                <a href="{{ route('announcements') }}">{{ __('nav.news') }}</a>
+                <a href="{{ route('announcements.index') }}">{{ __('nav.news') }}</a>
                 <a href="{{ route('careers') }}">{{ __('nav.careers') }}</a>
                 <a href="{{ route('contact') }}">{{ __('nav.contact') }}</a>
             </div>
@@ -161,5 +156,6 @@ footer{padding:80px 0 30px;background:var(--ink);color:var(--white)}
     });
 </script>
 @stack('scripts')
+<x-success-modal />
 </body>
 </html>

@@ -15,7 +15,7 @@ class AnnouncementsController extends Controller
 {
     public function index()
     {
-        $announcements = Announcement::latest('published_at')->paginate(15);
+        $announcements = Announcement::with('attachments')->latest('published_at')->paginate(15);
         return view('admin.announcements.index', compact('announcements'));
     }
 
@@ -61,6 +61,7 @@ class AnnouncementsController extends Controller
             'title' => ['ar' => $validated['title_ar'], 'en' => $validated['title_en']],
             'excerpt' => ['ar' => $validated['excerpt_ar'] ?? '', 'en' => $validated['excerpt_en'] ?? ''],
             'content' => ['ar' => $validated['content_ar'], 'en' => $validated['content_en']],
+            'slug' => $validated['slug'],
             'type' => $validated['type'],
             'published_at' => $validated['published_at'] ?? null,
             'is_active' => $request->boolean('is_active', true),
@@ -109,8 +110,9 @@ class AnnouncementsController extends Controller
 
     private function flushAnnouncementCache(): void
     {
-        Cache::forget('public.announcements.ar');
-        Cache::forget('public.announcements.en');
-        Cache::forget('public.news.latest');
+        foreach (['ar', 'en'] as $locale) {
+            Cache::forget("public.announcements.{$locale}");
+            Cache::forget("public.news.latest.{$locale}");
+        }
     }
 }

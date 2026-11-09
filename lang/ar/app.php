@@ -4,12 +4,17 @@ return [
     // NAV
     'nav' => [
         'home' => 'الرئيسية',
-        'services' => 'خدماتنا',
+        'about' => 'من نحن',
+        'services' => 'الخدمات',
         'products' => 'المنتجات',
+        'projects' => 'المشاريع',
         'news' => 'الأخبار',
+        'announcements' => 'الإعلانات',
         'careers' => 'الوظائف',
-        'contact' => 'تواصل معنا',
-        'request_quote' => 'طلب عرض سعر',
+        'contact' => 'اتصل بنا',
+        'request_quote' => 'اطلب عرض',
+        'main' => 'التنقل الرئيسي',
+        'menu' => 'القائمة',
     ],
 
     // FOOTER
@@ -86,11 +91,18 @@ return [
     // ADMIN
     'admin' => [
         'dashboard' => 'لوحة القيادة التنفيذية',
+        'leads' => 'العملاء المحتملون',
+        'announcements' => 'الإعلانات',
+        'careers' => ['postings' => 'إعلانات الوظائف'],
         'metrics' => [
             'total_pipeline_value' => 'إجمالي قيمة pipeline',
             'active_rfqs' => 'RFQs نشطة',
             'current_projects' => 'المشاريع النشطة',
             'hiring_pipeline' => 'مسار التوظيف',
+            'new_rfqs' => 'طلبات RFQ جديدة',
+            'engineering_review' => 'مراجعة هندسية',
+            'quotations_submitted' => 'عروض أسعار مقدمة',
+            'total_won_mtd' => 'إجمالي المكسب (الشهر)',
         ],
         'welcome_back' => 'مرحباً بعودتك',
         'q3_performance_summary' => 'إليك ملخص أداء الربع الثالث',
@@ -108,6 +120,8 @@ return [
         ],
         'catalog' => [
             'add_product' => 'إضافة منتج',
+            'products' => 'المنتجات',
+            'services' => 'الخدمات',
         ],
         'badge' => [
             'new_review' => 'مراجعة جديدة',

@@ -22,6 +22,7 @@ use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -44,15 +45,26 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perMinute(180)->by($request->ip());
         });
 
-        // Public Form submission rate limiting: Max 15 submissions per hour per IP
-        RateLimiter::for('public-forms', function (Request $request) {
-            return Limit::perHour(15)->by($request->ip());
+        // Public guest forms: 10 submissions per minute per IP, per form route.
+        // The route name is part of the key so exhausting the quote form never
+        // blocks a job application (and vice versa).
+        RateLimiter::for('guest-forms', function (Request $request) {
+            $form = $request->route()?->getName() ?? $request->path();
+
+            return Limit::perMinute(10)->by($request->ip() . '|' . $form);
         });
 
         // Bust the Redis catalog cache whenever a catalog record changes.
         Product::observe(ProductObserver::class);
         Service::observe(ServiceObserver::class);
         Announcement::observe(AnnouncementObserver::class);
+
+        // Share the active service catalog with the unified header component
+        // (<x-header />) so the services dropdown stays in sync with the DB on
+        // every public page without per-page controller changes.
+        View::composer('components.header', function ($view) {
+            $view->with('globalServices', Service::cachedActive());
+        });
 
         // Automatic audit logging on critical admin modifications.
         Quotation::observe(QuotationObserver::class);

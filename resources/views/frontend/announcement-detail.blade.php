@@ -1,60 +1,150 @@
 @extends('layouts.frontend')
 
 @php
-    // Locale-aware helper: use the existing ar.json translation when available,
-    // otherwise fall back to the English default (no lang file changes required).
-    $t = fn (string $key, string $fallback) => \Illuminate\Support\Facades\Lang::has($key) ? (string) __($key) : $fallback;
+    $ar = app()->getLocale() === 'ar';
 
     // title/excerpt/content are JSON columns — always resolve them per locale.
     $articleTitle = $announcement->getTranslated('title');
-    $articleExcerpt = $announcement->getTranslated('excerpt')
-        ?: \Illuminate\Support\Str::limit(strip_tags($announcement->getTranslated('content')), 160);
+    $articleLead = trim(strip_tags($announcement->getTranslated('excerpt')));
+    $articleExcerpt = $articleLead !== ''
+        ? $articleLead
+        : \Illuminate\Support\Str::limit(strip_tags($announcement->getTranslated('content')), 180);
+
+    $typeLabels = [
+        'news' => $ar ? 'أخبار' : 'News',
+        'press_release' => $ar ? 'بيانات صحفية' : 'Press Release',
+        'event' => $ar ? 'فعاليات' : 'Event',
+    ];
+    $typeLabel = $typeLabels[$announcement->type]
+        ?? ucfirst(str_replace('_', ' ', $announcement->type ?? 'news'));
 @endphp
 
-@section('title', $articleTitle . ' — ' . ($announcement->type === 'insight' ? 'Insights' : 'News') . ' — BETA Industrial')
-
+@section('title', $articleTitle . ' — BETA Industrial')
 @section('meta_description', $articleExcerpt)
 
 @section('content')
-<!-- Article Header -->
-<section class="article-header pt-20 pb-16 px-4 text-center gsap-fade-up">
-    <div class="container max-w-4xl">
-        <div class="label-tag-ocean mb-5">{{ ucfirst($announcement->type ?? 'news') }}</div>
-        <h1 class="font-display text-[clamp(35px,5vw,55px)] leading-[1.1] text-ink mb-5">{{ $articleTitle }}</h1>
-        <div class="flex items-center justify-center gap-4 text-muted text-sm">
-            <time datetime="{{ $announcement->published_at?->format('c') }}">
-                {{ $announcement->published_at?->format('F d, Y') }}
-            </time>
+<header class="ann-article-header">
+    <div class="container">
+        <div class="ann-article-header-inner">
+            <a href="{{ route('announcements.index', ['type' => $announcement->type]) }}" class="ann-article-type">
+                {{ $typeLabel }}
+            </a>
+            <h1>{{ $articleTitle }}</h1>
+            <div class="ann-article-meta">
+                <time datetime="{{ $announcement->published_at?->format('c') }}">
+                    {{ $announcement->published_at?->format('F d, Y') }}
+                </time>
+                <span aria-hidden="true">/</span>
+                <span>BETA Industrial</span>
+            </div>
         </div>
     </div>
-</section>
+</header>
 
-<!-- Featured Image -->
-@if($announcement->featured_image)
-    <div class="article-img max-w-[1000px] mx-auto px-4 mb-16 gsap-fade-up">
-        <img src="{{ asset('storage/' . $announcement->featured_image) }}" 
-             alt="{{ $articleTitle }}" 
-             class="w-full h-[450px] object-cover rounded-none">
-    </div>
-@endif
+<article class="ann-article">
+    <div class="container">
+        <div class="ann-article-container">
+            @if($articleLead !== '')
+                <p class="ann-article-lead">{{ $articleLead }}</p>
+            @endif
 
-<!-- Article Body -->
-<article class="article-body max-w-[760px] mx-auto px-4 pb-24 gsap-fade-up">
-    <div class="prose prose-ink max-w-none">
-        {!! $announcement->getTranslated('content') !!}
-    </div>
+            <div class="prose">
+                {!! $announcement->getTranslated('content') !!}
+            </div>
 
-    <!-- Back to List -->
-    <div class="mt-16 pt-8 border-t border-line">
-        <a href="{{ route('announcements') }}" class="inline-flex items-center gap-2 text-ocean font-bold text-sm uppercase tracking-[.1em] hover:text-ink transition-colors">
-            ← {{ $t('announcements.back_to_list', 'Back to News & Insights') }}
-        </a>
+            <div class="ann-article-footer">
+                <a href="{{ route('announcements.index') }}" class="ann-back-link">
+                    <span aria-hidden="true">←</span>
+                    {{ $ar ? 'العودة إلى الأخبار والإعلانات' : 'Back to News & Announcements' }}
+                </a>
+            </div>
+        </div>
     </div>
 </article>
 @endsection
 
 @push('styles')
 <style>
+    .ann-article-header {
+        padding: 90px 0 60px;
+        background:
+            linear-gradient(135deg, rgba(7, 19, 33, .06), transparent 60%),
+            var(--white);
+        border-bottom: 1px solid var(--line);
+    }
+    .ann-article-header-inner {
+        max-width: 900px;
+    }
+    .ann-article-type {
+        display: inline-block;
+        margin-bottom: 22px;
+        color: var(--ocean);
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: .18em;
+        text-transform: uppercase;
+        border-bottom: 2px solid var(--sun);
+        padding-bottom: 6px;
+    }
+    .ann-article-header h1 {
+        font-family: "Manrope", sans-serif;
+        font-size: clamp(34px, 5.2vw, 60px);
+        line-height: 1.08;
+        letter-spacing: -.035em;
+        color: var(--ink);
+        margin-bottom: 24px;
+    }
+    html[dir="rtl"] .ann-article-header h1 { font-family: "Cairo", sans-serif; letter-spacing: 0; }
+    .ann-article-meta {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: .06em;
+        text-transform: uppercase;
+    }
+    .ann-article-meta span[aria-hidden] { color: var(--sun); }
+
+    .ann-article {
+        padding: 64px 0 110px;
+        background: var(--paper);
+    }
+    .ann-article-container {
+        max-width: 820px;
+        margin-inline: auto;
+    }
+    .ann-article-lead {
+        margin-bottom: 42px;
+        padding-bottom: 30px;
+        border-bottom: 1px solid var(--line);
+        color: var(--ink);
+        font-size: 20px;
+        line-height: 1.65;
+    }
+    .ann-article-footer {
+        margin-top: 64px;
+        padding-top: 30px;
+        border-top: 1px solid var(--line);
+    }
+    .ann-back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--ocean);
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+        transition: .2s;
+    }
+    .ann-back-link:hover {
+        color: var(--ink);
+        gap: 14px;
+    }
+
     /* Prose styling for article content */
     .prose {
         font-size: 17px;
@@ -75,47 +165,35 @@
         margin: 40px 0 16px;
         line-height: 1.3;
     }
-    .prose p {
-        margin-bottom: 24px;
-    }
+    .prose p { margin-bottom: 24px; }
     .prose blockquote {
         border-inline-start: 4px solid var(--sun);
-        padding-inline-start: 24px;
+        padding: 24px;
         font-style: italic;
         font-size: 20px;
         margin: 40px 0;
         color: var(--ink);
-        background: var(--paper);
-        padding: 24px;
+        background: var(--white);
         border-radius: 0 8px 8px 0;
     }
     .prose ul, .prose ol {
         margin: 24px 0;
         padding-inline-start: 24px;
     }
-    .prose li {
-        margin-bottom: 10px;
-    }
-    .prose img {
-        border-radius: 8px;
-        margin: 24px 0;
-    }
+    .prose li { margin-bottom: 10px; }
+    .prose img { border-radius: 8px; margin: 24px 0; }
     .prose a {
         color: var(--ocean);
         text-decoration: underline;
         text-underline-offset: 2px;
     }
-    .prose a:hover {
-        color: var(--ink);
-    }
-    .prose strong {
-        color: var(--ink);
-    }
+    .prose a:hover { color: var(--ink); }
+    .prose strong { color: var(--ink); }
     .prose code {
-        background: var(--paper);
+        background: var(--white);
         padding: 2px 6px;
         border-radius: 4px;
-        font-size: 0.9em;
+        font-size: .9em;
     }
     .prose pre {
         background: var(--ink);
@@ -129,6 +207,13 @@
         background: transparent;
         padding: 0;
         color: inherit;
+    }
+
+    @media (max-width: 700px) {
+        .ann-article-header { padding: 70px 0 45px; }
+        .ann-article { padding: 48px 0 80px; }
+        .ann-article-lead { font-size: 17px; }
+        .prose { font-size: 16px; }
     }
 </style>
 @endpush

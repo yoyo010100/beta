@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\CareersController;
 use App\Http\Controllers\Admin\CatalogController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\QuotationLeadController;
+use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\FrontendController;
 use App\Http\Controllers\QuoteController;
 use Illuminate\Support\Facades\Route;
@@ -29,19 +30,26 @@ Route::middleware(['throttle:180,1'])->group(function () {
     Route::get('/services', [FrontendController::class, 'services'])->name('services');
     Route::get('/services/{slug}', [FrontendController::class, 'serviceDetail'])->name('service.detail');
     Route::get('/products', [FrontendController::class, 'products'])->name('products');
-    Route::get('/news', [FrontendController::class, 'announcements'])->name('announcements');
-    Route::get('/announcements', [FrontendController::class, 'announcements'])->name('announcements.index');
-    Route::get('/news/{announcement:public_id}', [FrontendController::class, 'announcementShow'])->name('announcements.show')->whereUlid('announcement');
-    Route::get('/announcements/{announcement:public_id}', [FrontendController::class, 'announcementShow'])->whereUlid('announcement');
-    Route::get('/insights/{announcement:public_id}', [FrontendController::class, 'insightDetail'])->name('insights.show')->whereUlid('announcement');
+
+    // Public announcements (published, active records only).
+    Route::get('/announcements', [AnnouncementController::class, 'index'])->name('announcements.index');
+    Route::get('/announcements/{announcement:public_id}', [AnnouncementController::class, 'show'])
+        ->name('announcements.show')->whereUlid('announcement');
+
+    // Legacy URLs kept alive for old links/bookmarks.
+    Route::redirect('/news', '/announcements')->name('announcements');
+    Route::redirect('/news/{announcement}', '/announcements/{announcement}')
+        ->whereUlid('announcement');
+    Route::redirect('/insights/{announcement}', '/announcements/{announcement}')
+        ->name('insights.show')->whereUlid('announcement');
     Route::get('/careers', [FrontendController::class, 'careers'])->name('careers');
     Route::get('/contact', [FrontendController::class, 'contact'])->name('contact');
     Route::view('/about', 'frontend.about')->name('about');
     Route::get('/projects', [FrontendController::class, 'projects'])->name('projects');
 });
 
-// ─── PUBLIC FORM SUBMISSIONS (15/hour per IP + Honeypot + Math CAPTCHA) ─────
-Route::middleware(['throttle:15,3600', 'antibot'])->group(function () {
+// ─── PUBLIC FORM SUBMISSIONS (10/min per IP, per form + Honeypot + CAPTCHA) ──
+Route::middleware(['throttle:guest-forms', 'antibot'])->group(function () {
     Route::post('/contact/quote', [QuoteController::class, 'store'])->name('quote.submit');
     Route::post('/careers/apply', [FrontendController::class, 'submitApplication'])->name('application.submit');
 });
@@ -68,6 +76,12 @@ Route::prefix('admin')->name('admin.')->middleware(['admin'])->group(function ()
     });
 
     // Product & Service Catalog
+    // Product restore is registered under the `admin.products.*` name space so that
+    // route('admin.products.restore', ...) in the admin product catalog resolves.
+    Route::prefix('catalog/products')->name('products.')->group(function () {
+        Route::post('{id}/restore', [CatalogController::class, 'restoreProduct'])->name('restore');
+    });
+
     Route::prefix('catalog')->name('catalog.')->group(function () {
         // Products
         Route::get('/products', [CatalogController::class, 'productsIndex'])->name('products');
@@ -77,7 +91,6 @@ Route::prefix('admin')->name('admin.')->middleware(['admin'])->group(function ()
         Route::put('/products/{product:public_id}', [CatalogController::class, 'productUpdate'])->name('products.update')->whereUlid('product');
         Route::delete('/products/{product:public_id}', [CatalogController::class, 'productDestroy'])->name('products.destroy')->whereUlid('product');
         Route::post('/products/{product:public_id}/attachments', [CatalogController::class, 'productAttachmentStore'])->name('products.attachments.store')->whereUlid('product');
-        Route::post('/admin/catalog/products/{id}/restore', [CatalogController::class, 'restoreProduct'])->name('admin.products.restore');
 
         // Services
         Route::get('/services', [CatalogController::class, 'servicesIndex'])->name('services');

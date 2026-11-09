@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BETA — Engineering The Future</title>
-<meta name="description" content="BETA — Engineering, manufacturing and installation of metal and steel structures.">
+<title>{{ __('app.home.seo_title') }}</title>
+<meta name="description" content="{{ __('app.home.seo_description') }}">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -722,28 +722,7 @@ footer{
 
 <body>
 
-<header class="nav">
-    <div class="nav-inner">
-    <a class="brand" href="{{ route('home') }}"><span class="brand-mark"></span>BETA</a>
-
-        <nav class="nav-links" id="nav">
-            <a href="{{ route('home') }}" @class(['active' => request()->routeIs('home')]) data-i18n="nav.home">Home</a>
-            <a href="{{ route('about') }}" @class(['active' => request()->routeIs('about')]) data-i18n="nav.about">About</a>
-            <a href="{{ route('services') }}" @class(['active' => request()->routeIs('services')]) data-i18n="nav.services">Services</a>
-            <a href="{{ route('products') }}" @class(['active' => request()->routeIs('products')]) data-i18n="nav.products">Products</a>
-            <a href="{{ route('projects') }}" @class(['active' => request()->routeIs('projects')]) data-i18n="nav.projects">Projects & Sectors</a>
-            <a href="{{ route('announcements') }}" @class(['active' => request()->routeIs('announcements*')]) data-i18n="nav.news">Announcements</a>
-            <a href="{{ route('careers') }}" @class(['active' => request()->routeIs('careers*')]) data-i18n="nav.careers">Careers</a>
-            <a href="{{ route('contact') }}" @class(['active' => request()->routeIs('contact')]) data-i18n="nav.contact">Contact</a>
-        </nav>
-
-        <div class="nav-right">
-            <a href="{{ route('locale.switch', app()->getLocale() === 'ar' ? 'en' : 'ar') }}" class="lang" style="color:white;text-decoration:none;font-weight:700;">{{ app()->getLocale() === 'ar' ? 'EN' : 'عربي' }}</a>
-            <a class="quote" href="{{ route('contact') }}">Request a Quote →</a>
-            <button class="menu" id="menu" aria-label="Menu">☰</button>
-        </div>
-    </div>
-</header>
+<x-header />
 
 <main>
 
@@ -755,65 +734,58 @@ footer{
 
     <div class="hero-content">
         <div class="overline">
-            {{ __('app.services') }}
+            {{ __('app.nav.services') }}
             @if($firstService?->getTranslated('title'))
                 {{ $firstService?->getTranslated('title') }}
             @else
-                Industrial Engineering & Steel Structures
+                {{ __('home.overline_fallback') }}
             @endif
         </div>
 
         <h1>
-            WE BUILD<br>
-            WHAT<br>
-            <em>MATTERS.</em>
+            {!! __('home.hero_headline') !!}
         </h1>
 
         <p class="hero-description">
-            Engineering, manufacturing and installation under one roof.
-            BETA turns demanding structural requirements into precise,
-            durable and buildable solutions.
+            {{ __('home.hero_description') }}
         </p>
 
         <div class="hero-actions">
-            <a href="#solutions" class="btn primary">Explore Solutions <b>↗</b></a>
-            <a href="{{ route('contact') }}" class="btn">Start a Project <b>→</b></a>
+            <a href="#solutions" class="btn primary">{{ __('home.explore_solutions') }} <b>↗</b></a>
+            <a href="{{ route('contact') }}" class="btn">{{ __('home.start_project') }} <b>→</b></a>
         </div>
     </div>
 
     <div class="hero-code">
         <div class="hero-code-top">
-            <span>Project Capacity</span>
+            <span>{{ __('home.project_capacity') }}</span>
             <span>01 / 04</span>
         </div>
         <div class="hero-code-line"></div>
         <div class="code-number">16<span>+</span></div>
-        <div class="code-small">Years of engineering experience</div>
+        <div class="code-small">{{ __('home.years_experience') }}</div>
     </div>
 
-    <div class="hero-scroll"><span></span> Scroll to explore</div>
+    <div class="hero-scroll"><span></span> {{ __('home.scroll_explore') }}</div>
 </section>
 
 <!-- INTRO -->
 <section class="intro">
     <div class="container intro-grid">
         <div class="reveal-left">
-            <div class="label">01 / The BETA Standard</div>
+            <div class="label">{{ __('home.standard_label') }}</div>
         </div>
 
         <div class="reveal">
             <h2 class="intro-big">
-                Precision is not a feature.
-                <strong>It is the foundation.</strong>
+                {!! __('home.standard_heading') !!}
             </h2>
 
             <p class="intro-text">
-                From structural steel and metal fabrication to complete
-                installation, BETA brings the full project journey together.
-                One team. One process. One accountable partner.
+                {{ __('home.standard_body') }}
             </p>
 
-            <div class="intro-line">Engineering · Manufacturing · Installation</div>
+            <div class="intro-line">{{ __('home.standard_line') }}</div>
         </div>
     </div>
 </section>
@@ -822,12 +794,12 @@ footer{
 <div class="marquee" aria-hidden="true">
     <div class="marquee-track">
         <span>
-            {{ __('app.services') }} <b>✦</b>
-            {{ $firstService?->getTranslated('title') ? ucfirst($firstService?->getTranslated('title')) : 'MANUFACTURE' }} <b>✦</b>
-            INSTALL <b>✦</b>
-            {{ $firstService?->getTranslated('title') ? ucfirst($firstService?->getTranslated('title')) : 'MANUFACTURE' }}
+            {{ __('app.nav.services') }} <b>✦</b>
+            {{ $firstService?->getTranslated('title') ? ucfirst($firstService?->getTranslated('title')) : __('home.word_manufacture') }} <b>✦</b>
+            {{ __('home.word_install') }} <b>✦</b>
+            {{ $firstService?->getTranslated('title') ? ucfirst($firstService?->getTranslated('title')) : __('home.word_manufacture') }} <b>✦</b>
         </span>
-        <span>ENGINEER <b>✦</b> MANUFACTURE <b>✦</b> INSTALL <b>✦</b> ENGINEER <b>✦</b> MANUFACTURE <b>✦</b> INSTALL <b>✦</b></span>
+        <span>{{ __('home.word_engineer') }} <b>✦</b> {{ __('home.word_manufacture') }} <b>✦</b> {{ __('home.word_install') }} <b>✦</b> {{ __('home.word_engineer') }} <b>✦</b> {{ __('home.word_manufacture') }} <b>✦</b> {{ __('home.word_install') }} <b>✦</b></span>
     </div>
 </div>
 
@@ -836,12 +808,11 @@ footer{
     <div class="container">
         <div class="section-heading reveal">
             <div>
-                <div class="label">02 / Solutions</div>
-                <h2>Built around<br>the challenge.</h2>
+                <div class="label">{{ __('home.solutions_label') }}</div>
+                <h2>{!! __('home.solutions_heading') !!}</h2>
             </div>
             <p>
-                From large-scale structures to specialist fabrication,
-                our capabilities adapt to the technical demands of the project.
+                {{ __('home.solutions_sub') }}
             </p>
         </div>
 
@@ -864,36 +835,34 @@ footer{
     <div class="container">
         <div class="process-heading reveal">
             <div>
-                <div class="label" style="color:var(--yellow)">03 / How We Deliver</div>
-                <h2>One process.<br><span>Zero gaps.</span></h2>
+                <div class="label" style="color:var(--yellow)">{{ __('home.process_label') }}</div>
+                <h2>{!! __('home.process_heading') !!}</h2>
             </div>
             <p>
-                The BETA journey connects consultation, engineering,
-                fabrication, quality control and installation into one
-                controlled delivery process.
+                {{ __('home.process_sub') }}
             </p>
         </div>
 
         <div class="steps">
             <div class="step reveal">
                 <div class="step-dot">01</div>
-                <div><h3>Consult</h3><p>Understand the requirement and define the project.</p></div>
+                <div><h3>{{ __('home.step_consult') }}</h3><p>{{ __('home.step_consult_desc') }}</p></div>
             </div>
             <div class="step reveal">
                 <div class="step-dot">02</div>
-                <div><h3>Engineer</h3><p>Develop drawings, calculations and technical solutions.</p></div>
+                <div><h3>{{ __('home.step_engineer') }}</h3><p>{{ __('home.step_engineer_desc') }}</p></div>
             </div>
             <div class="step reveal">
                 <div class="step-dot">03</div>
-                <div><h3>Manufacture</h3><p>Fabricate with controlled quality and material traceability.</p></div>
+                <div><h3>{{ __('home.step_manufacture') }}</h3><p>{{ __('home.step_manufacture_desc') }}</p></div>
             </div>
             <div class="step reveal">
                 <div class="step-dot">04</div>
-                <div><h3>Install</h3><p>Execute safely and efficiently on site.</p></div>
+                <div><h3>{{ __('home.step_install') }}</h3><p>{{ __('home.step_install_desc') }}</p></div>
             </div>
             <div class="step reveal">
                 <div class="step-dot">05</div>
-                <div><h3>Support</h3><p>Stay involved beyond delivery when the project requires it.</p></div>
+                <div><h3>{{ __('home.step_support') }}</h3><p>{{ __('home.step_support_desc') }}</p></div>
             </div>
         </div>
     </div>
@@ -904,31 +873,29 @@ footer{
     <div class="container">
         <div class="section-heading reveal">
             <div>
-                <div class="label">04 / Selected Work</div>
-                <h2>Projects that<br>speak for us.</h2>
+                <div class="label">{{ __('home.work_label') }}</div>
+                <h2>{!! __('home.work_heading') !!}</h2>
             </div>
-            <p>Use BETA's real project photography here to immediately communicate scale, capability and execution.</p>
+            <p>{{ __('home.work_sub') }}</p>
         </div>
 
         <div class="project-feature reveal">
             <div class="project-visual">
-                <div class="project-index">PROJECT / 001</div>
-                <img src="https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1700&q=90" alt="Steel architecture project">
+                <div class="project-index">{{ __('home.project_code') }}</div>
+                <img src="https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1700&q=90" alt="{{ __('home.img_alt') }}">
                 <div class="project-caption">
-                    <small>Industrial Structure</small>
-                    <h3>Built with purpose.</h3>
+                    <small>{{ __('home.project_small') }}</small>
+                    <h3>{{ __('home.project_built') }}</h3>
                 </div>
             </div>
 
             <div class="project-info">
-                <div class="label">Featured Project</div>
-                <h2>From drawing<br>to reality.</h2>
+                <div class="label">{{ __('home.featured_label') }}</div>
+                <h2>{!! __('home.featured_heading') !!}</h2>
                 <p>
-                    A complete engineering and fabrication story.
-                    This area becomes the visual proof of BETA's ability
-                    to execute projects at scale.
+                    {{ __('home.featured_body') }}
                 </p>
-                <a href="{{ route('projects') }}">View Project →</a>
+                <a href="{{ route('projects') }}">{{ __('home.view_project') }} →</a>
             </div>
         </div>
     </div>
@@ -939,23 +906,34 @@ footer{
     <div class="container">
         <div class="section-heading reveal">
             <div>
-                <div class="label">05 / Latest Updates</div>
-                <h2>News &amp; Engineering<br>Insights.</h2>
+                <div class="label">{{ __('home.updates_label') }}</div>
+                <h2>{!! __('home.updates_heading') !!}</h2>
             </div>
             <div>
-                <p>Stay informed on our latest projects, company news, and technical innovations.</p>
+                <p>{{ __('home.updates_sub') }}</p>
                 <div style="margin-top:15px;">
-                    <a href="{{ route('announcements') }}" class="btn" style="color:var(--ink);border-color:var(--ink);">View All Announcements <b>↗</b></a>
+                    <a href="{{ route('announcements.index') }}" class="btn" style="color:var(--ink);border-color:var(--ink);">{{ __('home.view_all_announcements') }} <b>↗</b></a>
                 </div>
             </div>
         </div>
 
         <div class="news-grid">
+            @php
+                $homeTypeLabels = [
+                    'news' => __('home.type_news'),
+                    'press_release' => __('home.type_press'),
+                    'event' => __('home.type_event'),
+                ];
+            @endphp
             @forelse($announcements ?? [] as $item)
+                @php
+                    $homeType = $homeTypeLabels[$item->type]
+                        ?? ucfirst(str_replace('_', ' ', $item->type ?? 'news'));
+                @endphp
                 <article class="news-card reveal">
                     <div>
                         <div class="news-meta">
-                            <span>{{ ucfirst($item->type ?? 'news') }}</span>
+                            <span>{{ $homeType }}</span>
                             <time datetime="{{ $item->published_at?->format('Y-m-d') }}">{{ $item->published_at?->format('M d, Y') ?? '—' }}</time>
                         </div>
                         <h3><a href="{{ route('announcements.show', $item->public_id) }}">{{ $item->getTranslated('title') }}</a></h3>
@@ -963,13 +941,13 @@ footer{
                     </div>
                     <div>
                         <a href="{{ route('announcements.show', $item->public_id) }}" class="news-link">
-                            Read Update <b>→</b>
+                            {{ __('home.read_update') }} <b>→</b>
                         </a>
                     </div>
                 </article>
             @empty
                 <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted);border:1px dashed var(--line);">
-                    <p>New announcements and project updates will be posted here soon.</p>
+                    <p>{{ __('home.no_announcements') }}</p>
                 </div>
             @endforelse
         </div>
@@ -980,12 +958,12 @@ footer{
 <section class="cta" id="contact">
     <div class="container cta-inner reveal">
         <div>
-            <div class="label">06 / Start a Conversation</div>
-            <h2>Have a project<br>in mind?</h2>
+            <div class="label">{{ __('home.cta_label') }}</div>
+            <h2>{!! __('home.cta_heading_home') !!}</h2>
         </div>
         <div style="display:flex;gap:15px;flex-wrap:wrap;">
-            <a href="{{ route('contact') }}" class="btn" style="background:var(--ink);color:var(--yellow);border-color:var(--ink);">Request a Quote <b>↗</b></a>
-            <a href="mailto:info@beta-industries.com" class="btn" style="background:transparent;color:var(--ink);border-color:var(--ink);">Talk to Engineering <b>✉</b></a>
+            <a href="{{ route('contact') }}" class="btn" style="background:var(--ink);color:var(--yellow);border-color:var(--ink);">{{ __('app.nav.request_quote') }} <b>↗</b></a>
+            <a href="mailto:info@beta-industries.com" class="btn" style="background:transparent;color:var(--ink);border-color:var(--ink);">{{ __('home.talk_engineering') }} <b>✉</b></a>
         </div>
     </div>
 </section>
@@ -998,58 +976,39 @@ footer{
             <div>
                 <a class="brand" href="{{ route('home') }}"><span class="brand-mark"></span>BETA</a>
                 <p class="footer-desc">
-                    Engineering, manufacturing and installation of
-                    industrial metal and steel solutions.
+                    {{ __('home.footer_desc') }}
                 </p>
             </div>
 
             <div class="footer-columns">
                 <div class="footer-col">
-                    <h4>Explore</h4>
-                    <a href="{{ route('services') }}">Solutions</a>
-                    <a href="#process">Capabilities</a>
-                    <a href="{{ route('projects') }}">Projects</a>
+                    <h4>{{ __('home.footer_explore') }}</h4>
+                    <a href="{{ route('services') }}">{{ __('app.footer.services') }}</a>
+                    <a href="#process">{{ __('home.footer_capabilities') }}</a>
+                    <a href="{{ route('projects') }}">{{ __('app.nav.projects') }}</a>
                 </div>
                 <div class="footer-col">
-                    <h4>Company</h4>
-                    <a href="{{ route('about') }}">About BETA</a>
-                    <a href="{{ route('careers') }}">Careers</a>
-                    <a href="{{ route('announcements') }}">Announcements &amp; Insights</a>
+                    <h4>{{ __('app.footer.company') }}</h4>
+                    <a href="{{ route('about') }}">{{ __('app.nav.about') }}</a>
+                    <a href="{{ route('careers') }}">{{ __('app.nav.careers') }}</a>
+                    <a href="{{ route('announcements.index') }}">{{ __('app.nav.announcements') }}</a>
                 </div>
                 <div class="footer-col">
-                    <h4>Contact</h4>
-                    <a href="{{ route('contact') }}">Request a Quote</a>
-                    <a href="mailto:info@beta-industries.com">Email</a>
+                    <h4>{{ __('app.nav.contact') }}</h4>
+                    <a href="{{ route('contact') }}">{{ __('app.nav.request_quote') }}</a>
+                    <a href="mailto:info@beta-industries.com">{{ __('home.footer_email') }}</a>
                 </div>
             </div>
         </div>
 
         <div class="footer-bottom">
-            <span>© 2026 BETA — All Rights Reserved</span>
-            <span>Engineer. Manufacture. Install.</span>
+            <span>&copy; {{ date('Y') }} BETA — {{ __('app.footer.rights') }}</span>
+            <span>{{ __('app.footer.tagline') }}</span>
         </div>
     </div>
 </footer>
 
 <script>
-/* Mobile navigation */
-const menu = document.getElementById("menu");
-const nav = document.getElementById("nav");
-
-if (menu && nav) {
-    menu.addEventListener("click", () => {
-        nav.classList.toggle("mobile");
-        menu.textContent = nav.classList.contains("mobile") ? "×" : "☰";
-    });
-
-    nav.querySelectorAll("a").forEach(link => {
-        link.addEventListener("click", () => {
-            nav.classList.remove("mobile");
-            menu.textContent = "☰";
-        });
-    });
-}
-
 /* Native reveal animation — no GSAP, no library */
 const revealObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
@@ -1074,5 +1033,6 @@ window.addEventListener("scroll", () => {
 }, {passive:true});
 </script>
 
+<x-success-modal />
 </body>
 </html>

@@ -56,8 +56,16 @@ class FrontendController extends Controller
 
     public function announcements()
     {
-        $announcements = Announcement::where('is_active', true)->latest()->paginate(9);
-        return view('frontend.announcements', compact('announcements'));
+        $announcements = Announcement::published()
+            ->with('attachments')
+            ->paginate(9)
+            ->withQueryString();
+
+        return view('frontend.announcements', [
+            'announcements' => $announcements,
+            'activeType' => null,
+            'types' => ['news', 'press_release', 'event'],
+        ]);
     }
 
     public function announcementShow(Announcement $announcement)
@@ -65,6 +73,9 @@ class FrontendController extends Controller
         if (!$announcement->is_active || !$announcement->published_at || $announcement->published_at->isFuture()) {
             abort(404);
         }
+
+        $announcement->load('attachments');
+
         return view('frontend.announcement-detail', compact('announcement'));
     }
 
@@ -160,29 +171,42 @@ class FrontendController extends Controller
 
         if ($request->hasFile('cv')) {
             $file = $request->file('cv');
-            $originalName = $file->getClientOriginalName();
 
-            // 1. Extension and filename sanitization (prevent path traversal, remove dangerous characters)
-            $cleanBaseName = preg_replace('/[^A-Za-z0-9_\-\. ]/', '_', basename($originalName));
+            // 2. Extension allow-list (mirrors JobApplicationRequest + FileValidationService):
+            //    executable/script types can never be stored.
             $safeExt = strtolower($file->getClientOriginalExtension());
             if (!in_array($safeExt, ['pdf', 'doc', 'docx'], true)) {
                 $safeExt = 'pdf';
             }
 
-            // 2. Prevent executable scripts / malicious files from running on storage:
-            // Store under a randomized ULID filename on the 'private' disk (outside web root).
-            $secureFileName = (string) Str::ulid() . '.' . $safeExt;
-            $destinationPath = 'documents/' . date('Y/m') . '/' . $secureFileName;
-            \Illuminate\Support\Facades\Storage::disk('private')->put($destinationPath, file_get_contents($file->getRealPath()));
+            // 1. Clean, ASCII-safe download filename: CV_<applicant-name-slug>_<timestamp>.ext
+            //    Converts Arabic/special characters to an ASCII slug so downloaded CVs never
+            //    carry corrupted names like "______-_________.pdf".
+            $nameSlug = Str::slug($request->applicant_name ?: 'candidate');
+            $nameSlug = $nameSlug ?: 'candidate';
+            $fileName = 'CV_' . $nameSlug . '_' . time() . '.' . $safeExt;
 
-            // 3. Create Attachment record with scan_status = 'passed' so it can be securely reviewed and downloaded in the admin panel
+            // 3. Store under a randomized ULID name on the 'private' disk
+            //    (storage/app/private/cvs — outside the web root, not publicly reachable).
+            $destinationPath = 'cvs/' . date('Y/m') . '/' . (string) Str::ulid() . '.' . $safeExt;
+            \Illuminate\Support\Facades\Storage::disk('private')->putFileAs(
+                dirname($destinationPath),
+                $file,
+                basename($destinationPath)
+            );
+
+            // 4. Server-side MIME detection (finfo) — never trust the client-supplied type.
+            $mimeType = app(\App\Services\FileValidationService::class)->detectMime($file->getRealPath());
+
+            // 5. Create Attachment record with scan_status = 'passed' (content validated
+            //    by magic-byte checks in JobApplicationRequest) so admins can review/download it.
             \App\Models\Attachment::create([
                 'public_id'       => (string) Str::ulid(),
                 'attachable_type' => JobApplication::class,
                 'attachable_id'   => $application->id,
                 'file_path'       => $destinationPath,
-                'file_name'       => $cleanBaseName,
-                'mime_type'       => $file->getClientMimeType() ?: 'application/octet-stream',
+                'file_name'       => $fileName,
+                'mime_type'       => $mimeType,
                 'size_bytes'      => $file->getSize(),
                 'scan_status'     => 'passed',
                 'uploaded_at'     => now(),
@@ -200,17 +224,20 @@ class FrontendController extends Controller
             \Log::info('Audit log skipped: ' . $e->getMessage());
         }
 
-        return redirect()->back()->with('success', __('Your application and CV have been submitted successfully.'));
+        return redirect()->back()->with('success', __('messages.application_success'));
     }
 
     public function switchLocale(Request $request, string $locale)
     {
-        if (!in_array($locale, ['ar', 'en'])) {
+        if (!in_array($locale, \App\Http\Middleware\SetLocale::SUPPORTED, true)) {
             abort(400);
         }
+
+        // One global switch: session for this visit + 1-year cookie so it is
+        // remembered for every page on the next visit (read by SetLocale).
         $request->session()->put('locale', $locale);
         \Illuminate\Support\Facades\App::setLocale($locale);
-        Cache::put('active_locale', $locale, 3600);
-        return redirect()->back();
+
+        return redirect()->back()->cookie(cookie()->forever('locale', $locale));
     }
 }

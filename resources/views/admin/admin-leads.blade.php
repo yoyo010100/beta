@@ -73,27 +73,27 @@ tr:hover { background: #f9fafb; }
     <nav class="nav-menu">
         <span class="nav-label">Core Modules</span>
         <a href="{{ route('admin.dashboard') }}" @class(['nav-item', 'active' => request()->routeIs('admin.dashboard')])>
-            <span class="icon">📊</span> {{ __('admin.dashboard') }}
+            <span class="icon">📊</span> {{ __('app.admin.dashboard') }}
         </a>
         <a href="{{ route('admin.leads.index') }}" @class(['nav-item', 'active' => request()->routeIs('admin.leads*')])>
-            <span class="icon">📩</span> {{ __('admin.leads') }}
+            <span class="icon">📩</span> {{ __('app.admin.leads') }}
         </a>
         <a href="{{ route('admin.catalog.products') }}" @class(['nav-item', 'active' => request()->routeIs('admin.catalog.products*')])>
-            <span class="icon">📦</span> {{ __('admin.catalog.products') }}
+            <span class="icon">📦</span> {{ __('app.admin.catalog.products') }}
         </a>
         <a href="{{ route('admin.catalog.services') }}" @class(['nav-item', 'active' => request()->routeIs('admin.catalog.services*')])>
-            <span class="icon">⚙️</span> {{ __('admin.catalog.services') }}
+            <span class="icon">⚙️</span> {{ __('app.admin.catalog.services') }}
         </a>
 
         <span class="nav-label" style="margin-top: 30px;">Content & HR</span>
         <a href="{{ route('admin.announcements.index') }}" @class(['nav-item', 'active' => request()->routeIs('admin.announcements*')])>
-            <span class="icon">📢</span> {{ __('admin.announcements') }}
+            <span class="icon">📢</span> {{ __('app.admin.announcements') }}
         </a>
         <a href="{{ route('admin.careers.index') }}" @class(['nav-item', 'active' => request()->routeIs('admin.careers.index') || request()->routeIs('admin.careers.show')])>
-            <span class="icon">👥</span> {{ __('admin.careers') }}
+            <span class="icon">👥</span> {{ __('app.admin.careers') }}
         </a>
         <a href="{{ route('admin.careers.postings') }}" @class(['nav-item', 'active' => request()->routeIs('admin.careers.postings*')])>
-            <span class="icon">💼</span> {{ __('admin.careers.postings') }}
+            <span class="icon">💼</span> {{ __('app.admin.careers.postings') }}
         </a>
     </nav>
 </aside>
@@ -105,18 +105,19 @@ tr:hover { background: #f9fafb; }
         gsap.fromTo('.gsap-ui', { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, stagger: 0.1 });
     });
 </script>
+<x-success-modal />
 </body>
 </html>
 
 <main class="main-content">
-    <header class="topbar"><div class="page-title">{{ __('admin.dashboard') }}</div><div class="user-profile"><span>Admin Manager</span><div class="avatar">AM</div></div></header>
+    <header class="topbar"><div class="page-title">{{ __('app.admin.dashboard') }}</div><div class="user-profile"><span>Admin Manager</span><div class="avatar">AM</div></div></header>
     
     <div class="wrapper">
         <div class="metric-grid gsap-ui">
-            <div class="metric-card"><h4>{{ __('admin.metrics.new_rfqs') }}</h4><div class="value">14</div></div>
-            <div class="metric-card"><h4>{{ __('admin.metrics.engineering_review') }}</h4><div class="value">8</div></div>
-            <div class="metric-card"><h4>{{ __('admin.metrics.quotations_submitted') }}</h4><div class="value">26</div></div>
-            <div class="metric-card"><h4>{{ __('admin.metrics.total_won_mtd') }}</h4><div class="value">5</div></div>
+            <div class="metric-card"><h4>{{ __('app.admin.metrics.new_rfqs') }}</h4><div class="value">14</div></div>
+            <div class="metric-card"><h4>{{ __('app.admin.metrics.engineering_review') }}</h4><div class="value">8</div></div>
+            <div class="metric-card"><h4>{{ __('app.admin.metrics.quotations_submitted') }}</h4><div class="value">26</div></div>
+            <div class="metric-card"><h4>{{ __('app.admin.metrics.total_won_mtd') }}</h4><div class="value">5</div></div>
         </div>
 
         <div class="toolbar gsap-ui">

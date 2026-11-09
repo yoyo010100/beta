@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BETA — {{ app()->getLocale() === 'ar' ? 'كتالوج المنتجات' : 'Product Catalog' }}</title>
+<title>{{ __('products.seo_title') }}</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
@@ -48,44 +48,21 @@ main { min-height: calc(100vh - var(--header-height)); padding-top: var(--header
 html[dir="rtl"] .drawer { right: auto; left: 0; transform: translateX(-100%); }
 .drawer-overlay.active .drawer { transform: translateX(0); }
 .drawer-close { font-size: 30px; cursor: pointer; align-self: flex-end; margin-bottom: 20px; }
-.alert-success { background: #d1fae5; border: 1px solid #6ee7b7; color: #065f46; padding: 14px 20px; margin: 20px 0; border-radius: 4px; }
 footer { padding: 80px 0 30px; background: var(--ink); color: var(--white); }
 .footer-top { display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.15); padding-bottom: 45px; }
 .footer-bottom { display: flex; justify-content: space-between; padding-top: 25px; font-size: 10px; color: #566574; text-transform: uppercase; letter-spacing: .15em; }
 </style>
 </head>
 <body>
-<header class="nav">
-    <div class="nav-inner">
-        <a class="brand" href="{{ route('home') }}"><span class="brand-mark"></span>BETA</a>
-        <nav class="nav-links">
-            <a href="{{ route('home') }}" @class(['active' => request()->routeIs('home')])>{{ __('app.nav.home') }}</a>
-            <a href="{{ route('services') }}" @class(['active' => request()->routeIs('services')])>{{ __('app.nav.services') }}</a>
-            <a href="{{ route('products') }}" @class(['active' => request()->routeIs('products')])>{{ __('app.nav.products') }}</a>
-            <a href="{{ route('contact') }}" @class(['active' => request()->routeIs('contact')])>{{ __('app.nav.contact') }}</a>
-        </nav>
-        <div style="display:flex; align-items:center; gap:20px;">
-            <span class="lang-switch">
-                <a href="{{ route('locale.switch', 'en') }}" class="{{ app()->getLocale() === 'en' ? 'active-lang' : '' }}">EN</a>
-                <span style="color:#fff;opacity:0.4;">|</span>
-                <a href="{{ route('locale.switch', 'ar') }}" class="{{ app()->getLocale() === 'ar' ? 'active-lang' : '' }}">عربي</a>
-            </span>
-            <a class="quote" href="{{ route('contact') }}">{{ __('app.nav.request_quote') }}</a>
-        </div>
-    </div>
-</header>
+<x-header />
 
 <main>
     <section class="inner-hero">
         <div class="container gsap-hero">
             <div class="label">{{ __('app.nav.products') }}</div>
-            <h1>{!! app()->getLocale() === 'ar' ? 'خط الإنتاج<br>الهيكلي والفولاذي.' : 'Structural &amp; Fabricated<br>Steel Line.' !!}</h1>
+            <h1>{!! __('products.hero_heading') !!}</h1>
         </div>
     </section>
-
-    @if (session('success'))
-        <div class="container"><div class="alert-success">{{ session('success') }}</div></div>
-    @endif
 
     <section class="section-pad">
         <div class="container">
@@ -103,12 +80,12 @@ footer { padding: 80px 0 30px; background: var(--ink); color: var(--white); }
                         <h3>{{ $product->getTranslated('title') }}</h3>
                         <p>{{ Str::limit($product->getTranslated('description'), 130) }}</p>
                         <span class="btn-spec">
-                            {{ app()->getLocale() === 'ar' ? 'عرض المواصفات التقنية ←' : 'View Technical Specs →' }}
+                            {{ __('products.view_specs') }}
                         </span>
                     </div>
                 @empty
                     <p style="color:var(--muted);grid-column:1/-1;text-align:center;padding:60px 0;font-size:16px;">
-                        {{ app()->getLocale() === 'ar' ? 'لا توجد منتجات متاحة حاليًا.' : 'No products available at the moment.' }}
+                        {{ __('products.empty') }}
                     </p>
                 @endforelse
             </div>
@@ -124,7 +101,7 @@ footer { padding: 80px 0 30px; background: var(--ink); color: var(--white); }
         </div>
         <div style="margin-top:30px;">
             <a href="{{ route('contact') }}" style="display:block;text-align:center;background:var(--ink);color:var(--sun);padding:16px;font-weight:800;text-transform:uppercase;">
-                {{ app()->getLocale() === 'ar' ? 'طلب عرض سعر للمواصفة' : 'Request Spec Quote' }}
+                {{ __('products.request_quote') }}
             </a>
         </div>
     </div>
@@ -164,7 +141,7 @@ footer { padding: 80px 0 30px; background: var(--ink); color: var(--white); }
         }
         document.getElementById('drawerBody').innerHTML = `
             <div style="font-size:10px;font-weight:800;color:var(--sun);text-transform:uppercase;margin-bottom:10px;">
-                ${locale === 'ar' ? 'ورقة المواصفات التقنية' : 'Technical Specification Sheet'}
+                ${@json(__('products.spec_sheet_title'))}
             </div>
             <h2 style="font-size:28px;margin-bottom:16px;line-height:1.2;">${item.title}</h2>
             <p style="color:var(--muted);margin-bottom:28px;line-height:1.7;">${item.desc}</p>
@@ -182,5 +159,6 @@ footer { padding: 80px 0 30px; background: var(--ink); color: var(--white); }
         });
     });
 </script>
+<x-success-modal />
 </body>
 </html>

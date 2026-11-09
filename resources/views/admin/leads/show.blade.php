@@ -93,7 +93,7 @@
                 {{-- Live Profit Indicator --}}
                 <div class="profit-display" id="profitDisplay">
                     <div class="profit-value" id="profitValue">
-                        <span id="currencySymbol">{{ $currencies->firstWhere('id', $lead->quotation?->currency_id)?->symbol ?? '' }}</span>0
+                        <span id="currencySymbol" style="margin-inline-end:8px">{{ $currencies->firstWhere('id', $lead->quotation?->currency_id)?->symbol ?? '' }}</span><span id="profitNumber">0</span>
                     </div>
                     <small>Gross Profit</small>
                     <div style="font-size:13px;font-weight:700;margin-top:4px;color:#276749" id="marginDisplay">— margin</div>
@@ -117,14 +117,19 @@
 function calcProfit() {
     const cost = parseFloat(document.getElementById('factoryCost').value) || 0;
     const sell = parseFloat(document.getElementById('sellingPrice').value) || 0;
+    // Gross Profit = Selling Price - Factory Cost  (single subtraction, no scaling)
     const profit = sell - cost;
-    const margin = sell > 0 ? ((profit / sell) * 100).toFixed(1) : 0;
+    // Gross Margin % = (Gross Profit / Selling Price) * 100  (guarded for 0 selling price)
+    const margin = sell !== 0 ? (profit / sell) * 100 : 0;
     const sym = document.getElementById('currencySelect').selectedOptions[0]?.dataset?.symbol || '';
+    document.getElementById('profitNumber').textContent = profit.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
     document.getElementById('currencySymbol').textContent = sym;
-    document.getElementById('profitValue').childNodes[1].textContent = profit.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
-    document.getElementById('marginDisplay').textContent = margin + '% margin';
+    const marginDisplay = document.getElementById('marginDisplay');
+    marginDisplay.textContent = margin.toFixed(1) + '% margin';
+    marginDisplay.style.color = margin >= 0 ? '#276749' : '#c53030';
     document.getElementById('profitDisplay').style.background = profit >= 0 ? 'linear-gradient(135deg,#f0fff4,#e6fffa)' : 'linear-gradient(135deg,#fff5f5,#fed7d7)';
     document.getElementById('profitDisplay').style.borderColor = profit >= 0 ? '#38a169' : '#e53e3e';
+    document.getElementById('profitValue').style.color = profit >= 0 ? '#276749' : '#b91c1c';
 }
 
 document.getElementById('currencySelect')?.addEventListener('change', calcProfit);

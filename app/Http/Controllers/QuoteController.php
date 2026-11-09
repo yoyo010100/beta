@@ -45,7 +45,7 @@ class QuoteController extends Controller
     {
         // 1. Invisible Honeypot check: silently drop bots
         if (!empty($request->input('hp_check')) || !empty($request->input('website_url_hp'))) {
-            return back()->with('success', __('Your quote request has been submitted successfully.'));
+            return back()->with('success', __('messages.quote_success'));
         }
 
         // 2. Resolve service_id, product_id, country_id whether passed as integer ID or ULID public_id
@@ -131,7 +131,7 @@ class QuoteController extends Controller
         }
 
         return back()
-            ->with('success', __('Your quote request has been submitted successfully. Our engineering team will review it shortly.'))
+            ->with('success', __('messages.quote_success'))
             ->with('quote_submitted', $quote->public_id);
     }
 

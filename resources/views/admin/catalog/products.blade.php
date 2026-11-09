@@ -45,7 +45,7 @@
                             @method('DELETE')
                             <button type="submit" class="btn btn-danger btn-sm">Archive</button>
                         </form>
-                        @if($product->wasRecentlyRestored())
+                        @if($product->wasRecentlyRestored)
                             <span class="text-green-500 text-sm mt-1">Restored!</span>
                         @endif
                     @else

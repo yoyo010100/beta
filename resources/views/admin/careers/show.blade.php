@@ -67,7 +67,7 @@
                 <div>
                     <div style="font-size:13px;font-weight:700">{{ $att->file_name }}</div>
                     <div style="font-size:11px;color:var(--muted)">
-                        {{ number_format(($att->size_bytes ?? 0) / 1024, 0) }} KB &bull;
+                        {{ ($att->size_bytes ?? 0) < 1024 ? ($att->size_bytes ?? 0) . ' B' : number_format(($att->size_bytes ?? 0) / 1024, 1) . ' KB' }} &bull;
                         <span class="badge badge-{{ $att->scan_status }}">{{ $att->scan_status }}</span>
                     </div>
                 </div>

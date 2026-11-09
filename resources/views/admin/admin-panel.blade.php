@@ -352,5 +352,6 @@ button { font: inherit; cursor: pointer; border: none; background: none; }
         new ApexCharts(document.querySelector("#sectorChart"), optionsSector).render();
     });
 </script>
+<x-success-modal />
 </body>
 </html>

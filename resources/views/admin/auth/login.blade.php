@@ -174,5 +174,6 @@
             document.getElementById('email').focus();
         });
     </script>
+<x-success-modal />
 </body>
 </html>

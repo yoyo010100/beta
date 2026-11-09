@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="{{ app()->getLocale() }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BETA — Insights</title>
+<title>{{ __('insights.seo_title') }}</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
@@ -57,62 +57,49 @@ footer { padding: 80px 0 30px; background: var(--ink); color: var(--white); }
 </style>
 </head>
 <body>
-<header class="nav">
-    <div class="nav-inner">
-        <a class="brand" href="{{ route('home') }}"><span class="brand-mark"></span>BETA</a>
-        <nav class="nav-links">
-            <a href="{{ route('home') }}" @class(['active' => request()->routeIs('home')]) data-i18n="nav.home">Home</a>
-            <a href="{{ route('announcements') }}" @class(['active' => request()->routeIs('announcements*', 'insights*')]) data-i18n="nav.insights">Insights</a>
-            <a href="{{ route('contact') }}" @class(['active' => request()->routeIs('contact')]) data-i18n="nav.contact">Contact</a>
-        </nav>
-        <div class="nav-right">
-            <button class="lang-switch" onclick="toggleLanguage()"><span id="lang-en" class="active-lang">EN</span> | <span id="lang-ar">عربي</span></button>
-            <a class="quote" href="{{ route('contact') }}" data-i18n="nav.quote">Request a Quote</a>
-        </div>
-    </div>
-</header>
+<x-header />
 <main>
     <section class="inner-hero">
         <div class="container gsap-hero">
-            <div class="label" data-i18n="ins.label">Content Hub</div>
-            <h1 data-i18n="ins.title">Engineering <br>Insights.</h1>
+            <div class="label">{!! __('insights.ins.label') !!}</div>
+            <h1>{!! __('insights.ins.title') !!}</h1>
         </div>
     </section>
     <section class="section-pad">
         <div class="container">
             <div class="filter-tags gsap-fade-up">
-                <span data-i18n="ins.t1">Steel Structures</span>
-                <span data-i18n="ins.t2">Metal Fabrication</span>
-                <span data-i18n="ins.t3">Construction Solutions</span>
-                <span data-i18n="ins.t4">Safety</span>
-                <span data-i18n="ins.t5">Case Studies</span>
+                <span>{!! __('insights.ins.t1') !!}</span>
+                <span>{!! __('insights.ins.t2') !!}</span>
+                <span>{!! __('insights.ins.t3') !!}</span>
+                <span>{!! __('insights.ins.t4') !!}</span>
+                <span>{!! __('insights.ins.t5') !!}</span>
             </div>
             <div class="blog-grid">
                 <div class="blog-card gsap-fade-up">
                     <div class="blog-img"><img src="https://images.unsplash.com/photo-1541888087401-443b35f60641?auto=format&fit=crop&w=600&q=80" alt="Blog Image"></div>
                     <div class="blog-info">
-                        <small data-i18n="ins.t1">Steel Structures</small>
-                        <h3 data-i18n="ins.b1.title">Advancements in Load-Bearing Architectural Steel</h3>
-                        <p data-i18n="ins.b1.desc">Exploring modern fabrication techniques that allow for wider spans and increased structural integrity in commercial buildings.</p>
-                        <a href="{{ route('announcements') }}" data-i18n="ins.read">Read Article →</a>
+                        <small>{!! __('insights.ins.t1') !!}</small>
+                        <h3>{!! __('insights.ins.b1.title') !!}</h3>
+                        <p>{!! __('insights.ins.b1.desc') !!}</p>
+                        <a href="{{ route('announcements.index') }}">{!! __('insights.ins.read') !!}</a>
                     </div>
                 </div>
                 <div class="blog-card gsap-fade-up">
                     <div class="blog-img"><img src="https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?auto=format&fit=crop&w=600&q=80" alt="Blog Image"></div>
                     <div class="blog-info">
-                        <small data-i18n="ins.t4">Safety</small>
-                        <h3 data-i18n="ins.b2.title">Implementing HSE Standards in Heavy Fabrication</h3>
-                        <p data-i18n="ins.b2.desc">A deep dive into BETA's safety protocols and how stringent regulations improve factory floor efficiency.</p>
-                        <a href="{{ route('announcements') }}" data-i18n="ins.read">Read Article →</a>
+                        <small>{!! __('insights.ins.t4') !!}</small>
+                        <h3>{!! __('insights.ins.b2.title') !!}</h3>
+                        <p>{!! __('insights.ins.b2.desc') !!}</p>
+                        <a href="{{ route('announcements.index') }}">{!! __('insights.ins.read') !!}</a>
                     </div>
                 </div>
                 <div class="blog-card gsap-fade-up">
                     <div class="blog-img"><img src="https://images.unsplash.com/photo-1589939705384-5185137a7f0f?auto=format&fit=crop&w=600&q=80" alt="Blog Image"></div>
                     <div class="blog-info">
-                        <small data-i18n="ins.t5">Case Studies</small>
-                        <h3 data-i18n="ins.b3.title">Delivering the Al-Zamil Logistics Hub</h3>
-                        <p data-i18n="ins.b3.desc">How our engineering team designed and executed a 10,000-ton warehouse structure under strict deadlines.</p>
-                        <a href="{{ route('announcements') }}" data-i18n="ins.read">Read Article →</a>
+                        <small>{!! __('insights.ins.t5') !!}</small>
+                        <h3>{!! __('insights.ins.b3.title') !!}</h3>
+                        <p>{!! __('insights.ins.b3.desc') !!}</p>
+                        <a href="{{ route('announcements.index') }}">{!! __('insights.ins.read') !!}</a>
                     </div>
                 </div>
             </div>
@@ -122,29 +109,16 @@ footer { padding: 80px 0 30px; background: var(--ink); color: var(--white); }
 <footer>
     <div class="container">
         <div class="footer-top"><a class="brand" href="{{ route('home') }}"><span class="brand-mark"></span>BETA</a></div>
-        <div class="footer-bottom"><span>© 2026 BETA</span><span data-i18n="footer.tagline">Engineer. Manufacture. Install.</span></div>
+        <div class="footer-bottom"><span>© 2026 BETA</span><span>{!! __('app.footer.tagline') !!}</span></div>
     </div>
 </footer>
 
 <script>
-    const translations = {
-        en: { nav: { home: "Home", insights: "Insights", contact: "Contact", quote: "Request a Quote" }, ins: { label: "Content Hub", title: "Engineering <br>Insights.", t1: "Steel Structures", t2: "Metal Fabrication", t3: "Construction Solutions", t4: "Safety", t5: "Case Studies", b1: { title: "Advancements in Load-Bearing Architectural Steel", desc: "Exploring modern fabrication techniques that allow for wider spans and increased structural integrity in commercial buildings." }, b2: { title: "Implementing HSE Standards in Heavy Fabrication", desc: "A deep dive into BETA's safety protocols and how stringent regulations improve factory floor efficiency." }, b3: { title: "Delivering the Al-Zamil Logistics Hub", desc: "How our engineering team designed and executed a 10,000-ton warehouse structure under strict deadlines." }, read: "Read Article →" }, footer: { tagline: "Engineer. Manufacture. Install." } },
-        ar: { nav: { home: "الرئيسية", insights: "الرؤى والمقالات", contact: "اتصل بنا", quote: "طلب عرض سعر" }, ins: { label: "مركز المحتوى", title: "رؤى <br>هندسية.", t1: "الهياكل الفولاذية", t2: "تشكيل المعادن", t3: "حلول البناء", t4: "السلامة", t5: "دراسات الحالة", b1: { title: "التطورات في الصلب المعماري الحامل للأوزان", desc: "استكشاف تقنيات التصنيع الحديثة التي تسمح بامتدادات أوسع وزيادة السلامة الهيكلية في المباني التجارية." }, b2: { title: "تطبيق معايير الصحة والسلامة في الصناعات الثقيلة", desc: "نظرة متعمقة على بروتوكولات السلامة في بيتا وكيف تعمل اللوائح الصارمة على تحسين كفاءة المصنع." }, b3: { title: "تسليم مركز لوجستيات الزامل", desc: "كيف قام فريقنا الهندسي بتصميم وتنفيذ هيكل مستودع بوزن 10,000 طن ضمن مواعيد نهائية صارمة." }, read: "قراءة المقال ←" }, footer: { tagline: "هندسة. تصنيع. تركيب." } }
-    };
-    let currentLang = localStorage.getItem('beta_lang') || 'en'; gsap.registerPlugin(ScrollTrigger);
-    function resolvePath(path, obj) { return path.split('.').reduce((p, c) => p && p[c], obj); }
-    function updateLang() {
-        document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr'; document.documentElement.lang = currentLang;
-        document.getElementById('lang-en').className = currentLang === 'en' ? 'active-lang' : ''; document.getElementById('lang-ar').className = currentLang === 'ar' ? 'active-lang' : '';
-        document.querySelectorAll('[data-i18n]').forEach(el => { const text = resolvePath(el.getAttribute('data-i18n'), translations[currentLang]); if(text) el.innerHTML = text; });
-        setTimeout(() => ScrollTrigger.refresh(), 150);
-    }
-    function toggleLanguage() { currentLang = currentLang === 'en' ? 'ar' : 'en'; localStorage.setItem('beta_lang', currentLang); updateLang(); }
     document.addEventListener("DOMContentLoaded", () => {
-        updateLang();
         gsap.fromTo('.gsap-hero > *', { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, stagger: 0.1, ease: "power3.out" });
         document.querySelectorAll('.gsap-fade-up').forEach(el => { gsap.fromTo(el, { y: 50, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, ease: "power3.out", scrollTrigger: { trigger: el, start: "top 85%" } }); });
     });
 </script>
+<x-success-modal />
 </body>
 </html>

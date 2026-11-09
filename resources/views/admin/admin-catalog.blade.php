@@ -73,27 +73,27 @@ tr:hover { background: #f9fafb; }
     <nav class="nav-menu">
         <span class="nav-label">Core Modules</span>
         <a href="{{ route('admin.dashboard') }}" @class(['nav-item', 'active' => request()->routeIs('admin.dashboard')])>
-            <span class="icon">📊</span> {{ __('admin.dashboard') }}
+            <span class="icon">📊</span> {{ __('app.admin.dashboard') }}
         </a>
         <a href="{{ route('admin.leads.index') }}" @class(['nav-item', 'active' => request()->routeIs('admin.leads*')])>
-            <span class="icon">📩</span> {{ __('admin.leads') }}
+            <span class="icon">📩</span> {{ __('app.admin.leads') }}
         </a>
         <a href="{{ route('admin.catalog.products') }}" @class(['nav-item', 'active' => request()->routeIs('admin.catalog.products*')])>
-            <span class="icon">📦</span> {{ __('admin.catalog.products') }}
+            <span class="icon">📦</span> {{ __('app.admin.catalog.products') }}
         </a>
         <a href="{{ route('admin.catalog.services') }}" @class(['nav-item', 'active' => request()->routeIs('admin.catalog.services*')])>
-            <span class="icon">⚙️</span> {{ __('admin.catalog.services') }}
+            <span class="icon">⚙️</span> {{ __('app.admin.catalog.services') }}
         </a>
 
         <span class="nav-label" style="margin-top: 30px;">Content & HR</span>
         <a href="{{ route('admin.announcements.index') }}" @class(['nav-item', 'active' => request()->routeIs('admin.announcements*')])>
-            <span class="icon">📢</span> {{ __('admin.announcements') }}
+            <span class="icon">📢</span> {{ __('app.admin.announcements') }}
         </a>
         <a href="{{ route('admin.careers.index') }}" @class(['nav-item', 'active' => request()->routeIs('admin.careers.index') || request()->routeIs('admin.careers.show')])>
-            <span class="icon">👥</span> {{ __('admin.careers') }}
+            <span class="icon">👥</span> {{ __('app.admin.careers') }}
         </a>
         <a href="{{ route('admin.careers.postings') }}" @class(['nav-item', 'active' => request()->routeIs('admin.careers.postings*')])>
-            <span class="icon">💼</span> {{ __('admin.careers.postings') }}
+            <span class="icon">💼</span> {{ __('app.admin.careers.postings') }}
         </a>
     </nav>
 </aside>
@@ -105,16 +105,17 @@ tr:hover { background: #f9fafb; }
         gsap.fromTo('.gsap-ui', { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, stagger: 0.1 });
     });
 </script>
+<x-success-modal />
 </body>
 </html>
 
 <main class="main-content">
-    <header class="topbar"><div class="page-title">{{ __('admin.dashboard') }}</div><div class="user-profile"><span>Admin Manager</span><div class="avatar">AM</div></div></header>
+    <header class="topbar"><div class="page-title">{{ __('app.admin.dashboard') }}</div><div class="user-profile"><span>Admin Manager</span><div class="avatar">AM</div></div></header>
     
     <div class="wrapper">
         <div class="flex-between gsap-ui">
-            <h2 style="font-size:24px;">{{ __('admin.catalog.products') }}</h2>
-            <button class="btn btn-primary">{{ __('admin.catalog.add_product') }}</button>
+            <h2 style="font-size:24px;">{{ __('app.admin.catalog.products') }}</h2>
+            <button class="btn btn-primary">{{ __('app.admin.catalog.add_product') }}</button>
         </div>
 
         <div class="toolbar gsap-ui">
@@ -127,13 +128,13 @@ tr:hover { background: #f9fafb; }
             <table>
                 <thead>
                     <tr>
-                        <th>{{ __('admin.table.headers.spec_id') }}</th>
-                        <th>{{ __('admin.table.headers.product_name') }}</th>
-                        <th>{{ __('admin.table.headers.material_grade') }}</th>
-                        <th>{{ __('admin.table.headers.category') }}</th>
-                        <th>{{ __('admin.table.headers.datasheet') }}</th>
-                        <th>{{ __('admin.table.headers.last_updated') }}</th>
-                        <th>{{ __('admin.table.headers.actions') }}</th>
+                        <th>{{ __('app.admin.table.headers.spec_id') }}</th>
+                        <th>{{ __('app.admin.table.headers.product_name') }}</th>
+                        <th>{{ __('app.admin.table.headers.material_grade') }}</th>
+                        <th>{{ __('app.admin.table.headers.category') }}</th>
+                        <th>{{ __('app.admin.table.headers.datasheet') }}</th>
+                        <th>{{ __('app.admin.table.headers.last_updated') }}</th>
+                        <th>{{ __('app.admin.table.headers.actions') }}</th>
                     </tr>
                 </thead>
                 <tbody>

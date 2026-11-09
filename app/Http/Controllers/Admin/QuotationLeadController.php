@@ -55,7 +55,7 @@ class QuotationLeadController extends Controller
 
         $oldQuotation = $lead->quotation ? $lead->quotation->toArray() : null;
 
-        $profitAmount = $validated['selling_price'] - $validated['factory_cost'];
+        $profitAmount = round(Quotation::grossProfit($validated['selling_price'], $validated['factory_cost']), 2);
 
         $quotation = Quotation::updateOrCreate(
             ['quote_request_id' => $lead->id],
@@ -76,14 +76,14 @@ class QuotationLeadController extends Controller
             'quotation.created_or_updated',
             $quotation,
             $oldQuotation,
-            ['factory_cost' => $validated['factory_cost'], 'selling_price' => $validated['selling_price'], 'profit_amount' => $validated['selling_price'] - $validated['factory_cost']]
+            ['factory_cost' => $validated['factory_cost'], 'selling_price' => $validated['selling_price'], 'profit_amount' => $profitAmount]
         );
 
         // Offload client notification to the Redis queue.
         SendQuotationNotificationJob::dispatch($lead);
 
         return redirect()->route('admin.leads.show', $lead->public_id)
-            ->with('success', 'Quotation saved. Profit: ' . number_format($validated['selling_price'] - $validated['factory_cost'], 2));
+            ->with('success', 'Quotation saved. Profit: ' . number_format($profitAmount, 2));
     }
 
     public function updateStatus(LeadStatusRequest $request, QuoteRequest $lead)

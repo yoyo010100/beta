@@ -10,7 +10,8 @@ class Quotation extends Model
 {
     use HasPublicId;
 
-    protected $guarded = ['id'];
+    // Never mass-assign the DB-generated column — MySQL computes it.
+    protected $guarded = ['id', 'profit_amount'];
 
     /** Never expose the auto-increment key in JSON/API responses. */
     protected $hidden = ['id'];
@@ -29,13 +30,33 @@ class Quotation extends Model
         'profit_amount' => 'decimal:2',
     ];
 
-    // ─── BOOT: auto-compute profit ─────────────────────────────────────────────
-    protected static function booted(): void
+    // ─── CANONICAL QUOTE MATH (single source of truth for frontend + backend) ──
+    /**
+     * Gross Profit = Selling Price - Factory Cost.
+     * Accepts decimal-cast strings or numbers; always computed as plain floats.
+     */
+    public static function grossProfit(mixed $sellingPrice, mixed $factoryCost): float
     {
-        static::saving(function (Quotation $q) {
-            $q->profit_amount = ($q->selling_price ?? 0) - ($q->factory_cost ?? 0);
-        });
+        return (float) ($sellingPrice ?? 0) - (float) ($factoryCost ?? 0);
     }
+
+    /**
+     * Gross Margin % = (Gross Profit / Selling Price) * 100.
+     * Guarded against a zero selling price.
+     */
+    public static function grossMarginPercent(mixed $sellingPrice, mixed $factoryCost): float
+    {
+        $selling = (float) ($sellingPrice ?? 0);
+        if ($selling == 0.0) {
+            return 0.0;
+        }
+        return (self::grossProfit($sellingPrice, $factoryCost) / $selling) * 100;
+    }
+
+    // NOTE: `profit_amount` is a STORED GENERATED column (`selling_price - factory_cost`)
+    // computed by MySQL. It must NEVER be written by the application — any INSERT/UPDATE
+    // that includes it fails with SQLSTATE[HY000]. Reads are fine.
+    // booted(): no mutations — Profit = Selling Price - Factory Cost handled by the DB.
 
     // ─── RELATIONS ────────────────────────────────────────────────────────────
     public function quoteRequest(): BelongsTo { return $this->belongsTo(QuoteRequest::class); }
@@ -46,6 +67,6 @@ class Quotation extends Model
     public function getMarginPercentAttribute(): float
     {
         if (!$this->selling_price || $this->selling_price == 0) return 0;
-        return round(($this->profit_amount / $this->selling_price) * 100, 2);
+        return round(static::grossMarginPercent($this->selling_price, $this->factory_cost), 2);
     }
 }
