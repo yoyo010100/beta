@@ -16,15 +16,26 @@ class Product extends Model
 
     protected $guarded = ['id'];
 
+    protected $fillable = [
+        'public_id',
+        'title',
+        'slug',
+        'description',
+        'specifications',
+        'is_active',
+        'file_path',
+        'technical_file',
+    ];
+
     /** Never expose the auto-increment key in JSON/API responses. */
     protected $hidden = ['id'];
 
     /**
-     * Bind routes by the 26-character ULID `public_id`, never the integer id.
+     * Bind routes by slug for public routes, or fallback to public_id.
      */
     public function getRouteKeyName(): string
     {
-        return 'public_id';
+        return 'slug';
     }
 
     protected $casts = [
@@ -42,6 +53,16 @@ class Product extends Model
     public function attachments()
     {
         return $this->morphMany(Attachment::class, 'attachable');
+    }
+
+    public function attributes()
+    {
+        return $this->hasMany(ProductAttribute::class)->orderBy('sort_order', 'asc')->orderBy('id', 'asc');
+    }
+
+    public function images()
+    {
+        return $this->hasMany(ProductImage::class)->orderBy('sort_order', 'asc')->orderBy('id', 'asc');
     }
 
     /** Catalog cache TTL (1 hour). */

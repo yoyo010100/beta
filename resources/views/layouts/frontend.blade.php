@@ -55,11 +55,11 @@
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         html { scroll-behavior: smooth; }
+        html, body { overflow-x: hidden; max-width: 100%; }
         body {
             font-family: "DM Sans", sans-serif;
             background: var(--paper);
             color: var(--ink);
-            overflow-x: hidden;
         }
         html[dir="rtl"] body { font-family: "Cairo", sans-serif; }
         h1, h2, h3, h4, .brand { font-family: "Manrope", sans-serif; }
@@ -105,6 +105,18 @@
             transition: .3s; display: inline-block; 
         }
         .btn-outline:hover { background: var(--sun); color: var(--ink); }
+
+        /* Fluid display headings — Cairo/Arabic and English titles never overflow on 375px */
+        h1{font-size:clamp(28px,6vw,48px);line-height:1.2;}
+        h2{font-size:clamp(24px,5vw,40px);line-height:1.25;}
+        .inner-hero h1{font-size:clamp(30px,7vw,56px);line-height:1;}
+
+        /* Responsive breakpoints: tablet (768px) and mobile */
+        @media (max-width:768px){
+            body .container{width:min(1380px,calc(100% - 32px));max-width:none;margin-inline:auto;}
+            .section-pad{padding:60px 0;}
+            .footer-top,.footer-bottom{flex-direction:column;gap:16px;text-align:center;}
+        }
     </style>
     @stack('styles')
 </head>

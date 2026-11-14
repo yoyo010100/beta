@@ -16,9 +16,14 @@
         ['route' => 'projects',        'pattern' => ['projects'],                    'key' => 'app.nav.projects'],
         ['route' => 'announcements.index', 'pattern' => ['announcements*', 'insights*'], 'key' => 'app.nav.announcements'],
         ['route' => 'careers',         'pattern' => ['careers*'],                    'key' => 'app.nav.careers'],
+        ['route' => 'certificates.index', 'pattern' => ['certificates*'],            'key' => 'app.nav.certificates'],
         ['route' => 'contact',         'pattern' => ['contact', 'quote.submit'],     'key' => 'app.nav.contact'],
     ];
-    $navActive = fn (array $patterns) => collect($patterns)->contains(fn ($p) => request()->routeIs($p));
+    $navActive = function ($patterns) {
+        return collect($patterns)->contains(function ($p) {
+            return request()->routeIs($p);
+        });
+    };
     $globalServices = $globalServices ?? collect();
 @endphp
 
@@ -37,15 +42,17 @@
     .lang:hover{border-color:var(--sun,#F2A900);color:var(--sun,#F2A900);}
     .quote{background:var(--sun,#F2A900);color:var(--ink,#071321);padding:12px 18px;font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;transition:background .2s;white-space:nowrap;}
     .quote:hover{background:#fff;}
-    .menu{display:none;background:none;border:0;color:#fff;font-size:26px;line-height:1;cursor:pointer;padding:4px 8px;}
-    .nav-mobile{display:none;position:fixed;top:var(--header-height,92px);inset-inline:0;z-index:999;background:rgba(7,19,33,.98);border-bottom:1px solid rgba(255,255,255,.12);padding:14px 24px 20px;max-height:calc(100vh - var(--header-height,92px));overflow-y:auto;}
+    .menu{display:none;background:none;border:0;color:var(--white,#fff);font-size:26px;line-height:1;cursor:pointer;padding:4px 8px;}
+    .menu:hover{color:var(--sun,#F2A900);}
+    .nav-mobile{display:none;position:fixed;top:var(--header-height,92px);inset-inline:0;z-index:999;background:var(--ink);border-bottom:1px solid rgba(255,255,255,.12);padding:14px 24px 20px;max-height:calc(100vh - var(--header-height,92px));overflow-y:auto;}
     .nav-mobile.open{display:block;}
     .nav-mobile a{display:block;padding:13px 6px;font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.78);text-decoration:none;border-bottom:1px solid rgba(255,255,255,.08);}
     .nav-mobile a:last-child{border-bottom:0;}
     .nav-mobile a:hover,.nav-mobile a.active{color:var(--sun,#F2A900);}
     @media (max-width:1180px){.nav-links{gap:16px;}.quote{padding:12px 12px;}}
-    @media (max-width:1024px){.nav-links,.quote{display:none;}.menu{display:block;}}
+    @media (max-width:1024px){.nav-links,.quote,.lang{display:none;}.menu{display:block;}}
     @media (min-width:1025px){.nav-mobile{display:none !important;}}
+    @media (max-width:768px){.nav-inner{width:calc(100% - 32px);}}
 </style>
 
 <header class="nav">
@@ -69,6 +76,8 @@
         @foreach($navItems as $item)
             <a href="{{ route($item['route']) }}" @class(['active' => $navActive($item['pattern'])])>{{ __($item['key']) }}</a>
         @endforeach
+        <a class="lang" href="{{ route('locale.switch', $isAr ? 'en' : 'ar') }}" rel="alternate" hreflang="{{ $isAr ? 'en' : 'ar' }}" lang="{{ $isAr ? 'en' : 'ar' }}">{{ $isAr ? 'EN' : 'عربي' }}</a>
+        <a class="quote" href="{{ route('contact') }}">{{ __('app.nav.request_quote') }}</a>
     </nav>
 </header>
 

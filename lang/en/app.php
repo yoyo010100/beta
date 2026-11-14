@@ -11,6 +11,7 @@ return [
         'news' => 'News',
         'announcements' => 'Announcements',
         'careers' => 'Careers',
+        'certificates' => 'Certificates',
         'contact' => 'Contact',
         'request_quote' => 'Request a Quote',
         'main' => 'Main navigation',
@@ -80,6 +81,67 @@ return [
         'hours_detail' => 'Sunday — Thursday, 8:00 AM — 5:00 PM',
         'no_prices_heading' => 'A Note on Pricing',
         'no_prices_body' => 'BETA Industrial does not display public prices. Pricing is determined on a project-by-project basis by our sales engineering team.',
+    ],
+
+    // ABOUT
+    'about' => [
+        'seo_title' => 'About Us — BETA Industrial',
+        'seo_description' => 'Learn about BETA Industrial: heavy steel fabrication, engineering and installation across Egypt and Saudi Arabia.',
+        'hero' => [
+            'label' => 'About BETA',
+            'title' => 'Built on Precision.<br>Driven by Industry.',
+            'desc' => 'For over 16 years, BETA Industrial has delivered mission-critical steel structures across Egypt and Saudi Arabia — from concept to commissioning.',
+        ],
+        'stats' => [
+            'exp' => 'Years Experience',
+            'projects' => 'Projects Delivered',
+            'tons' => 'Steel Fabricated',
+            'industries' => 'Industries Served',
+        ],
+        'vision' => [
+            'title' => 'Our Vision',
+            'text' => 'To be the region\'s most trusted partner in heavy steel engineering — delivering structures that define skylines and power industries.',
+        ],
+        'mission' => [
+            'title' => 'Our Mission',
+            'text' => 'To combine precision fabrication, rigorous quality standards, and on-time delivery to help our clients build stronger, safer, and faster.',
+        ],
+        'pillars' => [
+            'quality' => [
+                'title' => 'Uncompromising Quality',
+                'text' => 'ISO-certified processes with full material traceability and third-party inspections.',
+            ],
+            'safety' => [
+                'title' => 'Safety First',
+                'text' => 'Zero-incident culture with strict HSE protocols on every project site.',
+            ],
+            'innovation' => [
+                'title' => 'Engineering Innovation',
+                'text' => 'Advanced BIM modeling, CNC cutting, and robotic welding for complex geometries.',
+            ],
+            'delivery' => [
+                'title' => 'On-Time Delivery',
+                'text' => 'Dedicated logistics fleet and site crews ensuring milestone adherence.',
+            ],
+        ],
+        'downloads' => [
+            'label' => 'Technical Resources',
+            'title' => 'Technical Downloads',
+            'read_more' => 'Read More',
+            'read_less' => 'Read Less',
+            'download' => 'Download',
+            'issued' => 'Issued',
+            'no_downloads' => 'No technical downloads available at the moment.',
+        ],
+    ],
+
+    // CERTIFICATES
+    'certificates' => [
+        'seo_title' => 'Certificates — BETA Industrial',
+        'seo_description' => 'Professional certifications and quality credentials from BETA Industrial.',
+        'title' => 'Certificates',
+        'subtitle' => 'Professional certifications and quality credentials from BETA Industrial.',
+        'none' => 'No certificates available at the moment.',
     ],
 
     // MESSAGES

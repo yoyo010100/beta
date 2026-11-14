@@ -10,11 +10,14 @@ use App\Jobs\ProcessFileUploadJob;
 use App\Jobs\ScanAttachmentMalwareJob;
 use App\Models\Attachment;
 use App\Models\Product;
+use App\Models\ProductAttribute;
+use App\Models\ProductImage;
 use App\Models\Service;
 use App\Services\AuditLogger;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -30,7 +33,7 @@ class CatalogController extends Controller
 
     public function productCreate()
     {
-        return view('admin.catalog.product-form');
+        return view('admin.catalog.products.create');
     }
 
     public function productStore(ProductRequest $request)
@@ -45,6 +48,10 @@ class CatalogController extends Controller
             'is_active' => $request->boolean('is_active', true),
         ]);
 
+        $this->syncAttributes($request, $product);
+        $this->syncImages($request, $product);
+        $this->syncTechnicalFile($request, $product);
+
         $this->queueAttachment($request, $product);
         $this->flushCatalogCache();
         AuditLogger::log('product.created', $product, null, $product->toArray());
@@ -54,8 +61,8 @@ class CatalogController extends Controller
 
     public function productEdit(Product $product)
     {
-        $product->load('attachments');
-        return view('admin.catalog.product-form', compact('product'));
+        $product->load(['attachments', 'attributes', 'images']);
+        return view('admin.catalog.products.edit', compact('product'));
     }
 
     public function productUpdate(ProductRequest $request, Product $product)
@@ -71,6 +78,10 @@ class CatalogController extends Controller
             'is_active' => $request->boolean('is_active', true),
         ]);
 
+        $this->syncAttributes($request, $product);
+        $this->syncImages($request, $product);
+        $this->syncTechnicalFile($request, $product);
+
         $this->queueAttachment($request, $product);
         $this->flushCatalogCache();
         AuditLogger::log('product.updated', $product, $old, $product->fresh()->toArray());
@@ -80,6 +91,31 @@ class CatalogController extends Controller
 
     public function productDestroy(Product $product)
     {
+        // Clean up related attribute records.
+        $product->attributes()->delete();
+
+        // Delete related gallery images and their files from storage.
+        $product->images()->each(function ($image) {
+            $path = public_path($image->image_path);
+            if (file_exists($path)) {
+                @unlink($path);
+            }
+            $image->delete();
+        });
+
+        // Delete related attachment records and their files from storage.
+        $product->attachments()->each(function ($attachment) {
+            $path = public_path($attachment->file_path);
+            if (file_exists($path)) {
+                @unlink($path);
+            }
+            $attachment->delete();
+        });
+
+        if (!empty($product->file_path) && file_exists(public_path($product->file_path))) {
+            @unlink(public_path($product->file_path));
+        }
+
         AuditLogger::log('product.soft_deleted', $product, $product->toArray(), null);
         $product->delete();
         $this->flushCatalogCache();
@@ -212,13 +248,15 @@ class CatalogController extends Controller
         $file = $request->file('attachment');
 
         if ($request->hasFile('attachment') && $request->file('attachment')->isValid()) {
+            // Capture metadata before store() moves the uploaded temp file.
+            $sizeBytes = $file->getSize();
             $path = $file->store('attachments', 'public');
             $model->attachments()->create([
                 'public_id' => (string) Str::ulid(),
                 'file_path' => $path,
                 'file_name' => $file->getClientOriginalName(),
                 'mime_type' => $file->getClientMimeType(),
-                'size_bytes' => $file->getSize(),
+                'size_bytes' => $sizeBytes,
                 'scan_status' => 'pending',
                 'uploaded_at' => now(),
             ]);
@@ -231,6 +269,135 @@ class CatalogController extends Controller
             Cache::forget('public.services.all.' . $locale);
             Cache::forget('public.products.all.' . $locale);
             Cache::forget('public.services.' . $locale);
+        }
+    }
+
+    // ─── ATTRIBUTE & IMAGE SYNC HELPERS ──────────────────────────────────────
+
+    /**
+     * Replace product attributes from the dynamic repeater input.
+     * Expected input names: attr_name_en[], attr_name_ar[],
+     * attr_value_en[], attr_value_ar[].
+     * sort_order is auto-assigned by array index ($index + 1).
+     */
+    private function syncAttributes(Request $request, Product $product): void
+    {
+        $product->attributes()->delete();
+
+        $attrNamesEn = $request->input('attr_name_en', []);
+        $attrNamesAr = $request->input('attr_name_ar', []);
+        $attrValuesEn = $request->input('attr_value_en', []);
+        $attrValuesAr = $request->input('attr_value_ar', []);
+
+        foreach ($attrNamesEn as $index => $nameEn) {
+            if (empty(trim($nameEn)) && empty(trim($attrNamesAr[$index] ?? ''))) {
+                continue;
+            }
+
+            ProductAttribute::create([
+                'product_id' => $product->id,
+                'name_en' => trim($nameEn),
+                'name_ar' => trim($attrNamesAr[$index] ?? ''),
+                'value_en' => trim($attrValuesEn[$index] ?? ''),
+                'value_ar' => trim($attrValuesAr[$index] ?? ''),
+                'sort_order' => $index + 1,
+            ]);
+        }
+    }
+
+    /**
+     * Handle the technical datasheet / CAD file upload.
+     * Saved to public/uploads/products/files/ and the relative path is stored
+     * directly on the products.file_path column (NOT the attachments table).
+     * Old files are deleted on replace/remove.
+     */
+    private function syncTechnicalFile(Request $request, Product $product): void
+    {
+        $file = null;
+
+        // Accept upload from either 'technical_file' or 'file' input name.
+        if ($request->hasFile('technical_file')) {
+            $file = $request->file('technical_file');
+        } elseif ($request->hasFile('file')) {
+            $file = $request->file('file');
+        }
+
+        $remove = $request->boolean('removed_technical_file') || $request->input('technical_file_remove') == '1';
+
+        // Delete old file from disk if removing or replacing.
+        if ($remove || $file) {
+            if (!empty($product->file_path) && file_exists(public_path($product->file_path))) {
+                @unlink(public_path($product->file_path));
+            }
+        }
+
+        // Clear the column if removing and no replacement.
+        if ($remove && !$file) {
+            $product->update(['file_path' => null]);
+            return;
+        }
+
+        if (!$file || !$file->isValid()) {
+            return;
+        }
+
+        $dir = public_path('uploads/products/files');
+        File::ensureDirectoryExists($dir, 0755, true);
+
+        $ext = strtolower($file->getClientOriginalExtension());
+        $titleEn = is_array($product->title) ? ($product->title['en'] ?? 'product') : ($product->title ?? 'product');
+        $filename = Str::slug($titleEn ?: 'product') . '-datasheet-' . time() . '.' . $ext;
+        $relativePath = 'uploads/products/files/' . $filename;
+
+        // Capture metadata before move() removes the uploaded temp file.
+        $sizeBytes = $file->getSize();
+        $originalName = $file->getClientOriginalName();
+        $mimeType = $file->getClientMimeType();
+
+        $file->move($dir, $filename);
+
+        // Save relative path directly on the products.file_path column.
+        $product->update(['file_path' => $relativePath]);
+    }
+
+    /**
+     * Handle multiple product image uploads.
+     * Images are stored under public/uploads/products/ for production-safe direct asset() access.
+     * On edit, existing images marked for removal via `removed_images[]` are deleted.
+     */
+    private function syncImages(Request $request, Product $product): void
+    {
+        // Remove images marked for deletion on edit.
+        $removed = $request->input('removed_images', []);
+        if (!empty($removed)) {
+            ProductImage::whereIn('id', $removed)->each(function ($image) {
+                $path = public_path($image->image_path);
+                if (file_exists($path)) {
+                    @unlink($path);
+                }
+                $image->delete();
+            });
+        }
+
+        if (!$request->hasFile('images')) {
+            return;
+        }
+
+        $dir = public_path('uploads/products');
+        File::ensureDirectoryExists($dir, 0755, true);
+
+        $sort = (int) $product->images()->max('sort_order') + 1;
+        foreach ($request->file('images') as $file) {
+            $ext = strtolower($file->getClientOriginalExtension());
+            $filename = Str::slug($product->title['en'] ?? 'product') . '_' . time() . '_' . uniqid() . '.' . $ext;
+
+            $file->move($dir, $filename);
+
+            ProductImage::create([
+                'product_id' => $product->id,
+                'image_path' => 'uploads/products/' . $filename,
+                'sort_order' => $sort++,
+            ]);
         }
     }
 }

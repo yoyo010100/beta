@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="csrf-token" content="{{ csrf_token() }}">
 <title>@yield('title', 'BETA Admin') — Executive Command Center</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -53,6 +54,7 @@ button,select,input,textarea{font:inherit;outline:none}
 
 /* UTILITY */
 .flex-between{display:flex;justify-content:space-between;align-items:center}
+.menu-toggle{display:none;background:var(--ocean);color:var(--white);border:none;padding:8px 12px;border-radius:6px;font-size:18px;cursor:pointer}
 .btn{padding:10px 20px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;transition:.25s;border:none;display:inline-flex;align-items:center;gap:6px;letter-spacing:.03em}
 .btn-primary{background:var(--ocean);color:var(--white)}
 .btn-primary:hover{background:var(--ink);color:var(--sun)}
@@ -123,6 +125,20 @@ html[dir="rtl"] .form-group.full { grid-column: auto; }
 html[dir="rtl"] .nav-item { justify-content: flex-start; }
 html[dir="rtl"] .nav-item .icon { margin-right: 6px; margin-left: 0; }
 
+/* ADMIN RESPONSIVE — sidebar toggle + table overflow + form stacking */
+@media (max-width: 1024px){
+    .menu-toggle{display:inline-flex}
+    .sidebar{position:fixed;inset:0;z-index:100;transform:translateX(-100%);transition:transform .3s ease;width:var(--sidebar-w)}
+    .sidebar.open{transform:translateX(0)}
+    .admin-overlay{display:none;position:fixed;inset:0;z-index:90;background:rgba(7,19,33,.4);backdrop-filter:blur(2px)}
+    .admin-overlay.open{display:block}
+    .main-content{width:100%;margin-left:0}
+    .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+    .form-grid{grid-template-columns:1fr !important}
+}
+html[dir="rtl"] .sidebar{transform:translateX(100%)}
+html[dir="rtl"] .sidebar.open{transform:translateX(0)}
+
 /* Badge mirroring for Arabic */
 html[dir="rtl"] .badge { transform: scaleX(-1); transform-origin: left; }
 .flash-success{background:#f0fff4;border:1px solid #9ae6b4;color:#276749;padding:14px 18px;border-radius:8px;margin-bottom:20px;font-size:13px;font-weight:600}
@@ -168,6 +184,15 @@ html[dir="rtl"] .badge { transform: scaleX(-1); transform-origin: left; }
         <a href="{{ route('admin.announcements.index') }}" @class(['nav-item', 'active' => request()->routeIs('admin.announcements*')])>
             <span class="icon">📢</span> Announcements
         </a>
+
+        <span class="nav-section">Resources</span>
+        <a href="{{ route('admin.technical-downloads.index') }}" @class(['nav-item', 'active' => request()->routeIs('admin.technical-downloads*')])>
+            <span class="icon">⬇️</span> Technical Downloads
+        </a>
+        <a href="{{ route('admin.certificates.index') }}" @class(['nav-item', 'active' => request()->routeIs('admin.certificates*')])>
+            <span class="icon">🏆</span> Certificates
+        </a>
+
         <a href="{{ route('admin.careers.index') }}" @class(['nav-item', 'active' => request()->routeIs('admin.careers.index') || request()->routeIs('admin.careers.show')])>
             <span class="icon">👥</span> Job Applications
         </a>
@@ -183,8 +208,11 @@ html[dir="rtl"] .badge { transform: scaleX(-1); transform-origin: left; }
     </div>
 </aside>
 
+<div class="admin-overlay" id="adminOverlay" aria-hidden="true"></div>
+
 <main class="main-content">
     <header class="topbar">
+        <button class="menu-toggle" id="adminMenuToggle" aria-label="Toggle navigation">☰</button>
         <div class="topbar-left">
             <div class="page-title">@yield('page_title', 'Dashboard')</div>
             <div class="page-breadcrumb">BETA Industrial &rsaquo; @yield('page_title', 'Dashboard')</div>
@@ -217,6 +245,16 @@ html[dir="rtl"] .badge { transform: scaleX(-1); transform-origin: left; }
 <x-success-modal />
 <script>
 document.addEventListener("DOMContentLoaded", () => {
+    const toggle = document.getElementById('adminMenuToggle');
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.getElementById('adminOverlay');
+    if (toggle && sidebar && overlay) {
+        const openSidebar = () => { sidebar.classList.add('open'); overlay.classList.add('open'); document.body.style.overflow = 'hidden'; };
+        const closeSidebar = () => { sidebar.classList.remove('open'); overlay.classList.remove('open'); document.body.style.overflow = ''; };
+        toggle.addEventListener('click', () => sidebar.classList.contains('open') ? closeSidebar() : openSidebar());
+        overlay.addEventListener('click', closeSidebar);
+    }
+
     gsap.fromTo('.metric-card, .chart-card, .table-wrap, .form-card',
         { y: 18, opacity: 0 },
         { y: 0, opacity: 1, duration: 0.5, stagger: 0.07, ease: 'power2.out' }

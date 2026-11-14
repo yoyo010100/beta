@@ -452,6 +452,7 @@
         .apply-card { padding: 24px 16px; }
         .cv-dropzone { padding: 20px 14px; }
         .cv-selected { flex-wrap: wrap; }
+        .grid.grid-cols-1.md\\:grid-cols-2 { grid-template-columns: 1fr !important; }
     }
 </style>
 @endpush

@@ -123,6 +123,20 @@ html[dir="rtl"] .service-card::before {
 footer { padding: 80px 0 30px; background: var(--ink); color: var(--white); }
 .footer-top { display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.15); padding-bottom: 45px; }
 .footer-bottom { display: flex; justify-content: space-between; padding-top: 25px; font-size: 10px; color: #566574; text-transform: uppercase; letter-spacing: .15em; }
+
+@media (max-width: 1024px) {
+    .services-grid { grid-template-columns: repeat(2, 1fr); }
+    .container { width: min(1380px, calc(100% - 32px)); margin: auto; }
+}
+@media (max-width: 768px) {
+    .journey-step { flex-direction: column; gap: 16px; }
+    .step-body { flex: 1 1 100%; }
+    .services-grid { grid-template-columns: 1fr; }
+    .section-pad { padding: 70px 0; }
+    .inner-hero { padding: 80px 0 60px; }
+    footer { padding: 60px 0 30px; }
+    .footer-top, .footer-bottom { flex-direction: column; gap: 16px; text-align: center; }
+}
 </style>
 </head>
 <body>

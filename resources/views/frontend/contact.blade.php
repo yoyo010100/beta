@@ -48,6 +48,12 @@ main { min-height: calc(100vh - var(--header-height)); padding-top: var(--header
         .spinner { display: inline-block; width: 1rem; height: 1rem; vertical-align: middle; border: 0.25em solid currentColor; border-radius: 50%; border-top-color: transparent; animation: spin 0.8s ease-in-out infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
         .spinner.hidden { display: none; }
+
+@media (max-width: 768px) {
+    .form-box { padding: 24px 16px; }
+    .form-grid { grid-template-columns: 1fr; gap: 16px; }
+    .container { width: calc(100% - 32px); margin: auto; }
+}
 </style>
 </head>
 <body>
@@ -97,7 +103,7 @@ main { min-height: calc(100vh - var(--header-height)); padding-top: var(--header
                         <select name="product_id" class="form-select">
                             <option value="">{{ __('app.contact.select_product') }}</option>
                             @foreach($products as $product)
-                            <option value="{{ $product->id }}" @selected(old('product_id') == $product->id)>{{ $product->getTranslated('title') }}</option>
+                            <option value="{{ $product->id }}" @selected(old('product_id', $selectedProductId ?? ($preselectedProductId ?? null)) == $product->id)>{{ $product->getTranslated('title') }}</option>
                             @endforeach
                         </select>
                     </div>
